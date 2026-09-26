@@ -1,0 +1,11 @@
+﻿services:
+  - type: web
+    name: campusfind
+    env: python
+    buildCommand: pip install -r requirements.txt && python backend/seed_data.py
+    startCommand: gunicorn wsgi:app --workers=3 --timeout=120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_ENV
+        value: production

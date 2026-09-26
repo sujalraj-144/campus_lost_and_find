@@ -1,0 +1,35 @@
+﻿# Binaries & executables
+cloudflared.exe
+*.exe
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.pytest_cache/
+
+# Environments
+env/
+venv/
+.venv/
+ENV/
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Logs & temp
+*.log
+writer.py
+
+# IDEs
+.idea/
+.vscode/
+*.swp

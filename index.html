@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#070b14">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CampusFind | Campus Lost and Found Platform (SIH 2026)</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="assets/icon.svg">
+</head>
+<body>
+
+    <!-- Ambient Offline & Sync Banner -->
+    <div id="ambient-offline-banner" class="offline-banner hidden"></div>
+
+    <!-- Header Navigation Bar -->
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand-logo" onclick="App.switchView('landing')">
+                <div class="brand-icon-box">🧭</div>
+                <div>
+                    <div class="brand-title">TKRCET <span>CampusFind</span></div>
+                    <span class="brand-tagline-sub">TKR College of Engineering & Technology (Autonomous)</span>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li><a class="nav-link active-nav" data-view="landing">Home</a></li>
+                    <li><a class="nav-link" data-view="browse">Find Items</a></li>
+                    <li><a class="nav-link" data-view="report-lost">Report Lost</a></li>
+                    <li><a class="nav-link" data-view="report-found">Report Found</a></li>
+                    <li><a class="nav-link" data-view="dashboard">My Activity</a></li>
+                    <li id="nav-admin-link" class="hidden"><a class="nav-link" data-view="admin">🛡️ Admin Center</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <!-- Emergency SOS Hotline Button -->
+                <button id="btn-emergency-hotline" class="btn-emergency-pulse" onclick="App.openEmergencyModal()" title="TKRCET Emergency & Security Hotline (24x7)">
+                    🚨 Emergency SOS
+                </button>
+
+                <!-- PWA Install Button -->
+                <button id="btn-install-app" class="btn-install-pwa hidden" title="Install CampusFind on your device">
+                    📱 Install App
+                </button>
+
+                <!-- Outbox Sync Pill -->
+                <span id="outbox-sync-badge" class="outbox-badge-pill hidden" onclick="SyncManager.syncPendingReports()" title="Click to sync offline reports now">
+                    📡 0 Pending Sync
+                </span>
+
+                <!-- Notifications Bell -->
+                <div style="position: relative;">
+                    <button class="notif-bell-btn" id="btn-notifications-bell" title="Notifications">
+                        🔔
+                        <span id="notif-unread-count" class="notif-badge-pill hidden">0</span>
+                    </button>
+                    <!-- Notifications Dropdown -->
+                    <div id="notifications-popover" class="notif-popover hidden">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-weight: 700; font-size: 0.85rem;">Notifications</span>
+                            <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="App.renderNotifications()">Refresh</span>
+                        </div>
+                        <div id="notif-items-list" style="max-height: 280px; overflow-y: auto;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Persona Switcher with TKRCET Roll Numbers -->
+                <div class="persona-switch-box">
+                    <span style="font-size: 0.75rem; color: var(--text-dim);">Persona:</span>
+                    <select id="persona-select" class="persona-select">
+                        <option value="shiva">Shiva (22K91A0542 - CSE)</option>
+                        <option value="priya">Priya (23K91A0415 - ECE)</option>
+                        <option value="admin">Prof. K. Ravindra Reddy (Proctor)</option>
+                        <option value="security">Officer K. Narsimha (Security)</option>
+                    </select>
+                </div>
+
+                <!-- User profile preview -->
+                <div class="user-profile-pill">
+                    <img id="user-avatar" src="" alt="Avatar" class="user-avatar-img">
+                    <div style="display: flex; flex-direction: column; text-align: left;">
+                        <span id="user-display-name" style="font-size: 0.8rem; font-weight: 700; line-height: 1.1;">Shiva Kumar</span>
+                        <span id="user-display-role" style="font-size: 0.68rem; color: var(--primary);">22K91A0542 • CSE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+    <!-- MAIN CONTENT VIEWS -->
+    <main>
+
+        <!-- VIEW 1: LANDING PAGE -->
+        <section id="view-landing" class="view-container">
+            <div class="hero-section">
+                <div class="hero-glow-bg"></div>
+                <div class="container hero-content">
+                    <div class="hero-badge-pill">
+                        <span>🛡️ Official Campus Portal</span>
+                    </div>
+
+                    <h1 class="hero-title">
+                        Lost something on campus?<br>
+                        <span>Don't panic.</span> Someone may have found it.
+                    </h1>
+
+                    <p class="hero-desc">
+                        CampusFind transforms scattered lost-and-found notices and WhatsApp spam into one verified, searchable, and secure campus recovery ecosystem.
+                    </p>
+
+                    <div class="hero-cta-group">
+                        <button class="btn btn-lost" onclick="App.switchView('report-lost')">
+                            🔴 Report Lost Item
+                        </button>
+                        <button class="btn btn-found" onclick="App.switchView('report-found')">
+                            🟢 Report Found Item
+                        </button>
+                        <button class="btn btn-secondary" onclick="App.switchView('browse')">
+                            🔍 Browse All Items
+                        </button>
+                    </div>
+
+                    <div class="hero-features-bar">
+                        <span>🔍 <strong>Instant Campus Search</strong></span>
+                        <span>•</span>
+                        <span>📍 <strong>Geotagged Locations</strong></span>
+                        <span>•</span>
+                        <span>🛡️ <strong>Anti-Fraud Claim Verification</strong></span>
+                        <span>•</span>
+                        <span>⚡ <strong>AI Smart Matching</strong></span>
+                    </div>
+
+                    <!-- Live Showcase Statistics -->
+                    <div class="hero-stats-grid">
+                        <div class="stat-item">
+                            <div id="stat-reported" class="stat-value">128+</div>
+                            <div class="stat-label">Items Reported</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="stat-recovered" class="stat-value">74</div>
+                            <div class="stat-label">Items Recovered</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="stat-active" class="stat-value">42</div>
+                            <div class="stat-label">Active Listings</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="stat-match-rate" class="stat-value">89%</div>
+                            <div class="stat-label">Successful Matches</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive TKRCET Live Campus Map & Geolocation -->
+            <div class="container" style="margin-top: 40px;">
+                <div class="campus-map-card">
+                    <div class="campus-map-header">
+                        <div class="campus-map-title-box">
+                            <span style="font-size: 28px;">🗺️</span>
+                            <div>
+                                <h3>TKRCET Live Campus Map & Geolocation</h3>
+                                <p>Real-time GPS tracking across TKR College of Engineering & Technology (17.3230° N, 78.5580° E • Meerpet, Hyderabad)</p>
+                            </div>
+                        </div>
+
+                        <!-- Top Toolbar Controls -->
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <!-- Layer Toggles -->
+                            <div style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 6px;">
+                                <button class="map-view-toggle-btn active" id="btn-layer-dark" onclick="App.setMapLayer('dark')" title="Cyber Dark Street Map">🌌 Cyber Dark</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-sat" onclick="App.setMapLayer('satellite')" title="High-Resolution Satellite Imagery">🛰️ Satellite</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-blueprint" onclick="App.setMapLayer('blueprint')" title="Architectural Blueprint View">📐 Blueprint</button>
+                            </div>
+
+                            <!-- GPS Action Buttons -->
+                            <button class="btn-gps-action" id="btn-track-gps" onclick="App.trackLiveGPSLocation()" title="Locate your phone/device on campus">
+                                📍 Track My Live Location
+                            </button>
+                            <button class="map-view-toggle-btn" onclick="App.simulateCampusWalk()" title="Simulate a student walking across TKRCET blocks">
+                                🚶 Walk on Campus
+                            </button>
+                            <button class="map-view-toggle-btn" onclick="App.centerTKRCET()" title="Reset map view to TKRCET campus center">
+                                🎯 Center TKRCET
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div style="padding: 10px 20px; background: rgba(13, 21, 39, 0.7); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div class="map-filter-group">
+                            <span style="font-size: 0.76rem; color: var(--text-dim); margin-right: 4px; align-self: center;">Filter Markers:</span>
+                            <button class="map-filter-btn active" id="map-btn-all" onclick="App.filterCampusMap('all')">All Items</button>
+                            <button class="map-filter-btn" id="map-btn-lost" onclick="App.filterCampusMap('lost')">🔴 Lost Only</button>
+                            <button class="map-filter-btn" id="map-btn-found" onclick="App.filterCampusMap('found')">🟢 Found Only</button>
+                            <button class="map-filter-btn" id="map-btn-emergency" onclick="App.filterCampusMap('emergency')">🚨 Emergency Matters</button>
+                        </div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">
+                            <span>📍 8 Landmarks Geotagged • Click any marker to view custody & claim</span>
+                        </div>
+                    </div>
+
+                    <!-- REAL LEAFLET MAP VIEWPORT -->
+                    <div id="leaflet-campus-map-wrapper" style="position: relative;">
+                        <div id="leaflet-campus-map"></div>
+
+                        <!-- Fallback Architectural Blueprint Layer -->
+                        <div id="campus-map-blueprint" class="campus-map-canvas-container hidden">
+                            <svg class="campus-map-svg-roads" viewBox="0 0 1000 600" preserveAspectRatio="none">
+                                <path d="M 50 250 L 950 250" stroke="#334155" stroke-width="16" fill="none" stroke-dasharray="8 8"/>
+                                <path d="M 500 50 L 500 550" stroke="#334155" stroke-width="16" fill="none" stroke-dasharray="8 8"/>
+                                <path d="M 250 250 L 250 480 L 750 480 L 750 250" stroke="#1e293b" stroke-width="10" fill="none"/>
+                                <circle cx="500" cy="250" r="45" stroke="#38bdf8" stroke-width="2" fill="rgba(56, 189, 248, 0.05)" />
+                            </svg>
+
+                            <div class="campus-map-landmarks-layer">
+                                <div class="map-landmark-building" style="left: 28%; top: 38%; width: 140px;">
+                                    <div class="building-icon">📚</div>
+                                    <div class="building-label">Central Library</div>
+                                    <div class="building-sub">Vault & Reading Floors</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 45%; top: 22%; width: 135px;">
+                                    <div class="building-icon">💻</div>
+                                    <div class="building-label">CSE & IT Block</div>
+                                    <div class="building-sub">Labs 1-4 & AI Center</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 55%; top: 62%; width: 140px;">
+                                    <div class="building-icon">🏛️</div>
+                                    <div class="building-label">Academic Block A</div>
+                                    <div class="building-sub">ECE, Mech, Physics 204</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 73%; top: 72%; width: 130px;">
+                                    <div class="building-icon">☕</div>
+                                    <div class="building-label">TKR Canteen</div>
+                                    <div class="building-sub">Food Court & Lawn</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 85%; top: 28%; width: 130px;">
+                                    <div class="building-icon">🅿️</div>
+                                    <div class="building-label">Parking Bays</div>
+                                    <div class="building-sub">Two-Wheeler & Bus Bay</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 18%; top: 76%; width: 135px;">
+                                    <div class="building-icon">🏏</div>
+                                    <div class="building-label">Sports Ground</div>
+                                    <div class="building-sub">Cricket Oval & Pavilion</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 88%; top: 52%; width: 145px; border-color: rgba(245, 158, 11, 0.4);">
+                                    <div class="building-icon">🛡️</div>
+                                    <div class="building-label">Gate 1 Security Cabin</div>
+                                    <div class="building-sub">Safe Property Vault</div>
+                                </div>
+                                <div class="map-landmark-building" style="left: 60%; top: 38%; width: 125px;">
+                                    <div class="building-icon">🎭</div>
+                                    <div class="building-label">Main Auditorium</div>
+                                    <div class="building-sub">Seminar Hall 1</div>
+                                </div>
+                            </div>
+
+                            <div id="campus-map-pins" class="campus-map-pins-layer"></div>
+                        </div>
+                    </div>
+
+                    <!-- LIVE GPS STATUS READOUT BAR -->
+                    <div class="live-location-status-bar">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span id="live-gps-indicator" class="live-gps-chip">
+                                <span class="legend-dot" style="background: #38bdf8;"></span>
+                                <span id="live-gps-text">GPS Idle (Click "Track My Live Location" to locate)</span>
+                            </span>
+                            <span id="live-gps-nearest" style="color: var(--text-muted); font-size: 0.74rem;"></span>
+                        </div>
+                        <div class="legend-items">
+                            <span class="legend-pill"><span class="legend-dot lost"></span> 🔴 Lost</span>
+                            <span class="legend-pill"><span class="legend-dot found"></span> 🟢 Found & Vault</span>
+                            <span class="legend-pill"><span class="legend-dot emergency"></span> 🚨 Emergency</span>
+                            <span class="legend-pill"><span class="legend-dot" style="background: #0284c7; box-shadow: 0 0 8px #38bdf8;"></span> 🔵 Your Live Location</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campus Hotspots -->
+            <div class="container" style="margin-top: 10px;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Campus Recovery Hotspots</h2>
+                        <p class="section-subtitle">Real-time status across primary campus activity zones</p>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="App.switchView('browse')">View All Zones ➔</button>
+                </div>
+                <div id="campus-hotspots-container" class="hotspots-grid">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- How It Works Pipeline -->
+            <div class="how-it-works-section">
+                <div class="container">
+                    <div style="text-align: center; max-width: 650px; margin: 0 auto;">
+                        <h2 class="section-title">How CampusFind Works</h2>
+                        <p class="section-subtitle">End-to-end verified workflow from loss to recovery</p>
+                    </div>
+
+                    <div class="steps-pipeline-grid">
+                        <div class="pipeline-step-card">
+                            <div class="step-num-badge">1</div>
+                            <h3 class="step-title">Report with Geotag</h3>
+                            <p class="step-desc">Students report lost or found belongings with precise department, room, and time details.</p>
+                        </div>
+                        <div class="pipeline-step-card">
+                            <div class="step-num-badge">2</div>
+                            <h3 class="step-title">AI Smart Matching</h3>
+                            <p class="step-desc">Similarity algorithms evaluate keywords, categories, and campus proximity to detect candidate matches.</p>
+                        </div>
+                        <div class="pipeline-step-card">
+                            <div class="step-num-badge">3</div>
+                            <h3 class="step-title">Anti-Fraud Claim</h3>
+                            <p class="step-desc">Claimants provide concealed distinguishing details (scratches, stickers, serials) without seeing photos.</p>
+                        </div>
+                        <div class="pipeline-step-card">
+                            <div class="step-num-badge">4</div>
+                            <h3 class="step-title">Safe Handover Pass</h3>
+                            <p class="step-desc">Admin or proctor validates proof and issues a digital security pass for safe physical handover.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Reported Items -->
+            <div class="container" style="margin-bottom: 60px;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Recently Reported Items</h2>
+                        <p class="section-subtitle">Live campus listings requiring verification or identification</p>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="App.switchView('browse')">View All Items ➔</button>
+                </div>
+                <div id="recent-items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px;">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: STUDENT DASHBOARD -->
+        <section id="view-dashboard" class="view-container hidden">
+            <div class="container" style="padding-top: 30px;">
+                <div class="dash-banner">
+                    <div>
+                        <div class="hero-badge-pill" style="margin-bottom: 10px;">🎓 Verified Student Portal</div>
+                        <h1 class="text-3xl font-bold text-white">Good afternoon, <span id="dash-user-name">Shiva</span> 👋</h1>
+                        <p class="text-slate-300 mt-1">Manage your lost items, review AI smart matches, and track active ownership claims.</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-lost" onclick="App.switchView('report-lost')">🔴 Report Lost</button>
+                        <button class="btn btn-found" onclick="App.switchView('report-found')">🟢 Report Found</button>
+                    </div>
+                </div>
+
+                <!-- AI Smart Match Alert Banner -->
+                <div id="dashboard-match-banner" class="hidden">
+                    <!-- Populated when candidate match exists -->
+                </div>
+
+                <!-- 2-Column Dashboard Layout -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;">
+                    <!-- Left: My Reports -->
+                    <div>
+                        <div class="section-header">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">My Reported Items</h3>
+                                <p class="text-xs text-slate-400">Items you reported as lost or found</p>
+                            </div>
+                        </div>
+                        <div id="dash-my-reports">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: My Claims -->
+                    <div>
+                        <div class="section-header">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">My Active Claims</h3>
+                                <p class="text-xs text-slate-400">Ownership claims filed by you</p>
+                            </div>
+                        </div>
+                        <div id="dash-my-claims">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- VIEW 3: FIND / BROWSE ITEMS -->
+        <section id="view-browse" class="view-container hidden">
+            <div class="container" style="padding-top: 30px;">
+                <div class="section-header">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Find an Item on Campus</h1>
+                        <p class="section-subtitle">Real-time searchable database of all reported lost and found campus belongings</p>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btn-view-grid" class="btn btn-sm btn-secondary active">⊞ Cards</button>
+                        <button id="btn-view-list" class="btn btn-sm btn-secondary">☰ List</button>
+                    </div>
+                </div>
+
+                <!-- Advanced Search & Filter Bar -->
+                <div class="filter-panel">
+                    <div class="search-input-wrap">
+                        <span class="search-icon-svg">🔍</span>
+                        <input type="text" id="search-query" class="main-search-input" placeholder="Search by item name, description, location, or report code (e.g. AirPods, Library, Backpack)...">
+                    </div>
+
+                    <div class="filters-grid">
+                        <div>
+                            <select id="filter-type" class="filter-select">
+                                <option value="all">All Types (Lost & Found)</option>
+                                <option value="lost">🔴 Lost Items Only</option>
+                                <option value="found">🟢 Found Items Only</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="filter-category" class="filter-select">
+                                <option value="all">All Categories</option>
+                                <option value="Electronics">📱 Electronics</option>
+                                <option value="Bags">🎒 Bags & Backpacks</option>
+                                <option value="Books">📚 Books & Notebooks</option>
+                                <option value="Keys">🔑 Keys & Keychains</option>
+                                <option value="Clothing">👕 Clothing & Hoodies</option>
+                                <option value="ID/Cards">💳 College IDs & Cards</option>
+                                <option value="Accessories">🧴 Accessories & Watches</option>
+                                <option value="Other">📦 Other Items</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="filter-location" class="filter-select">
+                                <option value="all">All Locations</option>
+                                <option value="Central Library">Central Library</option>
+                                <option value="Canteen">Canteen / Cafeteria</option>
+                                <option value="Block A">Block A (Engg)</option>
+                                <option value="Block B">Block B</option>
+                                <option value="CSE Block">CSE Block & Labs</option>
+                                <option value="Sports Ground">Sports Ground / Complex</option>
+                                <option value="Parking">Campus Parking</option>
+                                <option value="Auditorium">Main Auditorium</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="filter-status" class="filter-select">
+                                <option value="all">All Statuses</option>
+                                <option value="reported">Reported</option>
+                                <option value="match_found">Match Detected</option>
+                                <option value="claim_submitted">Under Claim</option>
+                                <option value="returned">Recovered / Returned</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select id="filter-sort" class="filter-select">
+                                <option value="newest">Sort: Newest First</option>
+                                <option value="oldest">Sort: Oldest First</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="btn-reset-filters" class="btn btn-sm btn-secondary" style="width: 100%;">Clear Filters</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                    <span id="browse-results-count" style="font-size: 0.88rem; font-weight: 700; color: var(--text-muted);">Loading Campus Items...</span>
+                </div>
+
+                <!-- Items Container -->
+                <div id="browse-items-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: REPORT LOST ITEM -->
+        <section id="view-report-lost" class="view-container hidden">
+            <div class="container" style="padding-top: 30px;">
+                <div class="form-card" style="border-top: 4px solid var(--danger);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <span style="font-size: 24px;">🔴</span>
+                        <div>
+                            <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff;">Report a Lost Item</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Fill in the details below. Our AI matching engine will scan all found items immediately.</p>
+                        </div>
+                    </div>
+
+                    <form id="form-report-lost">
+                        <div class="form-group">
+                            <label class="form-label" for="lost-roll-no">TKRCET Student Roll Number *</label>
+                            <input type="text" id="lost-roll-no" class="form-input" required placeholder="e.g. 22K91A0542 or 23K91A0415" value="22K91A0542">
+                            <div id="lost-roll-badge" class="roll-validation-badge roll-valid">
+                                ✅ Verified TKRCET Student: Shiva Kumar (CSE, 3rd Year - Sec A)
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fca5a5; font-weight: 700; font-size: 0.85rem;">
+                                <input type="checkbox" id="lost-is-emergency" style="width: 18px; height: 18px; accent-color: #ef4444;">
+                                🚨 Mark as High-Priority / Emergency Matter
+                            </label>
+                            <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; margin-left: 28px;">
+                                Check this for lost original certificates, wallets with government IDs (Aadhaar/PAN), bank cards, or laptops with confidential data. Automatically notifies TKRCET Security Control Room.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-item-name">Item Name *</label>
+                            <input type="text" id="lost-item-name" class="form-input" required placeholder="e.g. Apple AirPods Pro (2nd Gen), Dell XPS Charger">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label" for="lost-category">Category *</label>
+                                <select id="lost-category" class="form-select" required>
+                                    <option value="Electronics">📱 Electronics</option>
+                                    <option value="Bags">🎒 Bags & Backpacks</option>
+                                    <option value="Books">📚 Books & Notes</option>
+                                    <option value="Keys">🔑 Keys</option>
+                                    <option value="Clothing">👕 Clothing</option>
+                                    <option value="ID/Cards">💳 College ID / Cards</option>
+                                    <option value="Accessories">🧴 Accessories</option>
+                                    <option value="Other">📦 Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label class="form-label" for="lost-location" style="margin: 0;">Where did you lose it? *</label>
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.autoFillGPSLocation('lost')" title="Auto-detect closest TKRCET building using your live device GPS">
+                                        📍 Detect Live GPS
+                                    </button>
+                                </div>
+                                <select id="lost-location" class="form-select" required>
+                                    <option value="Central Library">Central Library</option>
+                                    <option value="Canteen">Canteen & Cafeteria</option>
+                                    <option value="CSE Block">CSE Block & Labs</option>
+                                    <option value="Block A">Block A (Engineering)</option>
+                                    <option value="Block B">Block B</option>
+                                    <option value="Sports Ground">Sports Ground</option>
+                                    <option value="Parking">Campus Parking</option>
+                                    <option value="Auditorium">Main Auditorium</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-location-detail">Exact Spot / Room Detail</label>
+                            <input type="text" id="lost-location-detail" class="form-input" placeholder="e.g. 2nd Floor Quiet Study Zone, Desk #14 near East Window">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-date">When did you lose it? *</label>
+                            <input type="date" id="lost-date" class="form-input" required value="2026-09-24">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-desc">Public Description *</label>
+                            <textarea id="lost-desc" class="form-textarea" required placeholder="Describe appearance, color, brand, condition..."></textarea>
+                            <p class="form-hint">Visible to other students searching for items.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-secret" style="color: #fbbf24;">🛡️ Secret Distinguishing Marks (Anti-Fraud Proof)</label>
+                            <textarea id="lost-secret" class="form-textarea" placeholder="e.g. Scratch near charging port, custom stickers, serial number suffix..."></textarea>
+                            <p class="form-hint">Only used to verify ownership during claims.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="lost-image-url">Item Photo URL (Optional)</label>
+                            <input type="url" id="lost-image-url" class="form-input" placeholder="https://..." value="https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&auto=format&fit=crop&q=80">
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                            <button type="button" class="btn btn-secondary" onclick="App.switchView('landing')">Cancel</button>
+                            <button type="submit" class="btn btn-lost">🔴 Submit Lost Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 5: REPORT FOUND ITEM -->
+        <section id="view-report-found" class="view-container hidden">
+            <div class="container" style="padding-top: 30px;">
+                <div class="form-card" style="border-top: 4px solid var(--success);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <span style="font-size: 24px;">🟢</span>
+                        <div>
+                            <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff;">Report a Found Item</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Thank you for being a good citizen! Help return this item to its rightful owner.</p>
+                        </div>
+                    </div>
+
+                    <form id="form-report-found">
+                        <div class="form-group">
+                            <label class="form-label" for="found-roll-no">Finder TKRCET Roll Number / Staff ID *</label>
+                            <input type="text" id="found-roll-no" class="form-input" required placeholder="e.g. 23K91A0415 or SEC-TKR-09" value="23K91A0415">
+                            <div id="found-roll-badge" class="roll-validation-badge roll-valid">
+                                ✅ Verified TKRCET Student: Priya Sharma (ECE, 2nd Year - Sec B)
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-item-name">Item Name *</label>
+                            <input type="text" id="found-item-name" class="form-input" required placeholder="e.g. Apple AirPods Pro Wireless Case, Scientific Calculator">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label" for="found-category">Category *</label>
+                                <select id="found-category" class="form-select" required>
+                                    <option value="Electronics">📱 Electronics</option>
+                                    <option value="Bags">🎒 Bags & Backpacks</option>
+                                    <option value="Books">📚 Books & Notes</option>
+                                    <option value="Keys">🔑 Keys</option>
+                                    <option value="Clothing">👕 Clothing</option>
+                                    <option value="ID/Cards">💳 College ID / Cards</option>
+                                    <option value="Accessories">🧴 Accessories</option>
+                                    <option value="Other">📦 Other</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label class="form-label" for="found-location" style="margin: 0;">Where did you find it? *</label>
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.autoFillGPSLocation('found')" title="Auto-detect closest TKRCET building using your live device GPS">
+                                        📍 Detect Live GPS
+                                    </button>
+                                </div>
+                                <select id="found-location" class="form-select" required>
+                                    <option value="Central Library">Central Library</option>
+                                    <option value="Canteen">Canteen & Cafeteria</option>
+                                    <option value="CSE Block">CSE Block & Labs</option>
+                                    <option value="Block A">Block A (Engineering)</option>
+                                    <option value="Block B">Block B</option>
+                                    <option value="Sports Ground">Sports Ground</option>
+                                    <option value="Parking">Campus Parking</option>
+                                    <option value="Auditorium">Main Auditorium</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-location-detail">Exact Location Found</label>
+                            <input type="text" id="found-location-detail" class="form-input" placeholder="e.g. 2nd Floor Reading Table 14">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-custody">Safe Custody Location (Where is it deposited?) *</label>
+                            <input type="text" id="found-custody" class="form-input" required placeholder="e.g. Central Library Helpdesk (Librarian Mr. Nair) or With Me" value="Central Library Helpdesk (Librarian Mr. Nair)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-date">When did you find it? *</label>
+                            <input type="date" id="found-date" class="form-input" required value="2026-09-24">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-desc">Public Description *</label>
+                            <textarea id="found-desc" class="form-textarea" required placeholder="General description. Do not reveal private serial numbers or unique stickers here."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-secret" style="color: #fbbf24;">🔒 Confidential Inspection Notes (Concealed from Public)</label>
+                            <textarea id="found-secret" class="form-textarea" placeholder="Document tiny marks or scratches for Admin to verify against claims."></textarea>
+                            <p class="form-hint">Hidden from students to prevent false claims.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="found-image-url">Photo URL (Optional)</label>
+                            <input type="url" id="found-image-url" class="form-input" value="https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&auto=format&fit=crop&q=80">
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                            <button type="button" class="btn btn-secondary" onclick="App.switchView('landing')">Cancel</button>
+                            <button type="submit" class="btn btn-found">🟢 Submit Found Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 6: ADMIN CONTROL CENTER -->
+        <section id="view-admin" class="view-container hidden">
+            <div class="container" style="padding-top: 30px;">
+                <div class="section-header">
+                    <div>
+                        <div class="hero-badge-pill" style="margin-bottom: 8px;">🛡️ Campus Security & Proctor Authority</div>
+                        <h1 class="text-3xl font-bold text-white">Admin Control Center</h1>
+                        <p class="section-subtitle">Moderation queue, anti-fraud claim verification, and campus recovery ledger</p>
+                    </div>
+                </div>
+
+                <!-- Admin Stats Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">PENDING CLAIMS QUEUE</div>
+                        <div id="admin-stat-pending" style="font-size: 2rem; font-weight: 800; color: #fbbf24; margin-top: 4px;">1</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">TOTAL REPORTS</div>
+                        <div id="admin-stat-reported" style="font-size: 2rem; font-weight: 800; color: #fff; margin-top: 4px;">128</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">VERIFIED & RECOVERED</div>
+                        <div id="admin-stat-recovered" style="font-size: 2rem; font-weight: 800; color: #34d399; margin-top: 4px;">74</div>
+                    </div>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="admin-tabs-nav">
+                    <button class="admin-tab-btn active" data-tab="claims" onclick="App.switchAdminTab('claims')">
+                        ⚖️ Pending Claims Verification
+                    </button>
+                    <button class="admin-tab-btn" data-tab="items" onclick="App.switchAdminTab('items')">
+                        📋 All Campus Reports
+                    </button>
+                    <button class="admin-tab-btn" data-tab="students" onclick="App.switchAdminTab('students')">
+                        🎓 TKRCET Student Database
+                    </button>
+                    <button class="admin-tab-btn" data-tab="emergency" onclick="App.switchAdminTab('emergency')">
+                        🚨 Emergency Dispatch Feed
+                    </button>
+                </div>
+
+                <!-- Tab Pane 1: Claims -->
+                <div id="admin-pane-claims" class="admin-tab-pane">
+                    <div id="admin-claims-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Tab Pane 2: Items Moderation -->
+                <div id="admin-pane-items" class="admin-tab-pane hidden">
+                    <div id="admin-items-moderation">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Tab Pane 3: TKRCET Student Database -->
+                <div id="admin-pane-students" class="admin-tab-pane hidden">
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #fff;">TKRCET Institutional Student Directory</h3>
+                                <p style="font-size: 0.78rem; color: var(--text-muted);">Autonomous database with authentic student roll numbers (JNTUH standard) for identity verification.</p>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="admin-student-search" class="form-input" placeholder="Search Roll No or Student..." style="max-width: 260px; padding: 6px 12px; font-size: 0.8rem;" oninput="App.renderAdminStudents(this.value)">
+                            </div>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table class="tkrcet-student-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student Roll No</th>
+                                        <th>Name & Email</th>
+                                        <th>Department / Branch</th>
+                                        <th>Year & Sem</th>
+                                        <th>Contact Phone</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-students-table-body">
+                                    <!-- Populated dynamically by App.renderAdminStudents() -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Pane 4: Emergency Dispatches -->
+                <div id="admin-pane-emergency" class="admin-tab-pane hidden">
+                    <div id="admin-emergency-list">
+                        <!-- Populated dynamically by App.renderAdminEmergencies() -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <!-- MODAL 1: ITEM DETAILS -->
+    <div id="item-details-modal" class="modal-backdrop hidden" onclick="if(event.target === this) App.closeAllModals()">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="App.closeAllModals()">✕</button>
+            <div id="item-modal-content">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CLAIM VERIFICATION -->
+    <div id="claim-modal" class="modal-backdrop hidden" onclick="if(event.target === this) App.closeAllModals()">
+        <div class="modal-box" style="max-width: 620px;">
+            <button class="modal-close-btn" onclick="App.closeAllModals()">✕</button>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                <span style="font-size: 24px;">🔐</span>
+                <div>
+                    <h2 style="font-size: 1.4rem; font-weight: 800; color: #fff;">Verify Item Ownership</h2>
+                    <p id="claim-modal-item-title" style="font-size: 0.85rem; color: var(--primary); font-weight: 600;"></p>
+                    <p id="claim-custody-info" style="font-size: 0.75rem; color: var(--text-dim);"></p>
+                </div>
+            </div>
+
+            <div class="security-card" style="margin-bottom: 20px;">
+                <div style="font-size: 0.78rem; font-weight: 700; color: #fbbf24;">⚠️ ANTI-FRAUD CLAIM PROTOCOL</div>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                    To protect genuine student property, you must describe distinctive characteristics that are <strong>not visible in public photographs</strong> (e.g. engravings, internal marks, lock-screen wallpaper, or purchase invoices).
+                </p>
+            </div>
+
+            <form id="form-claim-item">
+                <input type="hidden" id="claim-item-id">
+
+                <div class="form-group">
+                    <label class="form-label" for="claim-roll-no">Claimant TKRCET Roll Number *</label>
+                    <input type="text" id="claim-roll-no" class="form-input" required placeholder="e.g. 22K91A0542" value="22K91A0542">
+                    <div id="claim-roll-badge" class="roll-validation-badge roll-valid">
+                        ✅ Verified TKRCET Student: Shiva Kumar (CSE, 3rd Year - Sec A)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="claim-proof-desc">1. Why do you believe this item belongs to you? *</label>
+                    <textarea id="claim-proof-desc" class="form-textarea" required placeholder="Explain where and when you lost it, context, or invoice proof..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="claim-secret-answers" style="color: #38bdf8;">
+                        2. Describe unique distinguishing features (Concealed Markings) *
+                    </label>
+                    <textarea id="claim-secret-answers" class="form-textarea" required placeholder="e.g. Scratches near port, custom sticker, serial number, wallpaper, contents..."></textarea>
+                    <p class="form-hint">Admin will compare your answer against custody inspection notes.</p>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="App.closeAllModals()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">🔐 Submit Ownership Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: AI SMART MATCH ALERT -->
+    <div id="match-alert-modal" class="modal-backdrop hidden" onclick="if(event.target === this) App.closeAllModals()">
+        <div class="modal-box" style="max-width: 720px;">
+            <button class="modal-close-btn" onclick="App.closeAllModals()">✕</button>
+            <div id="match-alert-content">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: TKRCET EMERGENCY & SAFETY HOTLINE -->
+    <div id="emergency-modal" class="modal-backdrop hidden" onclick="if(event.target === this) App.closeAllModals()">
+        <div class="modal-box" style="max-width: 780px;">
+            <button class="modal-close-btn" onclick="App.closeAllModals()">✕</button>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <span style="font-size: 28px;">🚨</span>
+                <div>
+                    <h2 style="font-size: 1.45rem; font-weight: 800; color: #fff;">TKRCET Campus Emergency & Safety Hotline</h2>
+                    <p style="font-size: 0.8rem; color: #fca5a5;">TKR College of Engineering & Technology, Meerpet, Hyderabad • 24x7 Campus Security</p>
+                </div>
+            </div>
+
+            <!-- Instant Dial Action Cards -->
+            <div class="emergency-hotline-grid">
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🚨 Security Control Room (Gate 1)</div>
+                        <div class="emergency-contact-incharge">Incharge: Officer K. Narsimha • 24x7 Active</div>
+                        <div class="emergency-contact-action">Immediate patrol dispatch, locker vault access & incident handling.</div>
+                    </div>
+                    <a href="tel:+919100024001" class="emergency-dial-btn">📞 Dial +91 91000 24001</a>
+                </div>
+
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🛡️ Chief Proctor & Dean Affairs</div>
+                        <div class="emergency-contact-incharge">Incharge: Prof. K. Ravindra Reddy • Admin Block</div>
+                        <div class="emergency-contact-action">Official student grievances, disciplinary & high-value recovery escalation.</div>
+                    </div>
+                    <a href="tel:04024092555" class="emergency-dial-btn" style="background: linear-gradient(135deg, #0284c7, #0369a1);">📞 Dial 040-2409 2555</a>
+                </div>
+
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🛑 Anti-Ragging Response Squad</div>
+                        <div class="emergency-contact-incharge">National Toll-Free • Strict Confidentiality</div>
+                        <div class="emergency-contact-action">24x7 rapid response against ragging or student harassment.</div>
+                    </div>
+                    <a href="tel:18001805522" class="emergency-dial-btn" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">📞 Dial 1800-180-5522</a>
+                </div>
+
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🌸 Women Protection Cell</div>
+                        <div class="emergency-contact-incharge">Incharge: Dr. V. Lalitha • 24x7 Helpline</div>
+                        <div class="emergency-contact-action">Women student safety, emergency shelter & immediate support.</div>
+                    </div>
+                    <a href="tel:+919100024002" class="emergency-dial-btn" style="background: linear-gradient(135deg, #db2777, #be185d);">📞 Dial +91 91000 24002</a>
+                </div>
+
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🗄️ Central Lost Property Vault</div>
+                        <div class="emergency-contact-incharge">Incharge: Chief Librarian Mr. Sudhakar • Library Ground Fl.</div>
+                        <div class="emergency-contact-action">Physical biometric and handover pass clearance for secured property.</div>
+                    </div>
+                    <a href="tel:04024092556" class="emergency-dial-btn" style="background: linear-gradient(135deg, #059669, #047857);">📞 Dial 040-2409 2556</a>
+                </div>
+
+                <div class="emergency-contact-box">
+                    <div>
+                        <div class="emergency-contact-title">🚑 Campus Ambulance & Health Center</div>
+                        <div class="emergency-contact-incharge">Medical Officer: Dr. Ramesh • 24x7 Emergency</div>
+                        <div class="emergency-contact-action">Immediate on-campus first aid, triage, and ambulance transfer.</div>
+                    </div>
+                    <a href="tel:+919100024005" class="emergency-dial-btn" style="background: linear-gradient(135deg, #ea580c, #c2410c);">📞 Dial +91 91000 24005</a>
+                </div>
+            </div>
+
+            <!-- Priority Serious Incident Form -->
+            <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 12px; padding: 18px;">
+                <h3 style="font-size: 1.05rem; font-weight: 800; color: #fca5a5; margin-bottom: 6px;">
+                    ⚡ Dispatch Serious Matter Emergency Alert
+                </h3>
+                <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 14px;">
+                    Use this form for urgent matters: lost original academic certificates (SSC, Inter, Degree memos), wallet with government IDs (PAN/Aadhaar/Driving License), confidential laptops, or suspicious baggage. Dispatches an immediate high-priority alert to Security Control Room.
+                </p>
+
+                <form id="form-emergency-alert">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="emergency-roll-no">Student Roll Number *</label>
+                            <input type="text" id="emergency-roll-no" class="form-input" required placeholder="e.g. 22K91A0542" value="22K91A0542">
+                            <div id="emergency-roll-badge" class="roll-validation-badge roll-valid">
+                                ✅ Verified TKRCET Student
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="emergency-incident-type">Incident Category *</label>
+                            <select id="emergency-incident-type" class="form-select" required>
+                                <option value="Lost Original Academic Certificates (Marks Memos/Transfer)">📜 Lost Original Academic Certificates (Memos)</option>
+                                <option value="Lost Wallet with Government IDs (Aadhaar/PAN/ATM)">💳 Lost Wallet with Govt IDs & Bank Cards</option>
+                                <option value="Lost Laptop with Confidential Project / Research Data">💻 Lost Laptop with Critical Project Data</option>
+                                <option value="Suspicious Unattended Bag / Security Concern">🎒 Suspicious Unattended Bag on Campus</option>
+                                <option value="Medical Emergency / Physical Distress">🚑 Urgent Medical / Safety Assistance</option>
+                                <option value="Other Serious Matter">⚠️ Other Serious Security Matter</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="emergency-location">Campus Location *</label>
+                            <select id="emergency-location" class="form-select" required>
+                                <option value="Central Library">Central Library</option>
+                                <option value="CSE Block">CSE & IT Block</option>
+                                <option value="Block A">Academic Block A</option>
+                                <option value="Canteen">TKR Student Canteen</option>
+                                <option value="Parking">Campus Parking Bays</option>
+                                <option value="Sports Ground">Cricket / Sports Ground</option>
+                                <option value="Auditorium">Main Auditorium</option>
+                                <option value="Security Gate 1">Gate 1 Security Entrance</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="emergency-phone">Contact Phone Number *</label>
+                            <input type="tel" id="emergency-phone" class="form-input" required value="+91 98765 43210">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="emergency-details">Incident Details & Immediate Action Needed *</label>
+                        <textarea id="emergency-details" class="form-textarea" rows="2" required placeholder="Describe what happened, any distinctive marks, and where you are currently waiting..."></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+                        <button type="button" class="btn btn-secondary" onclick="App.closeAllModals()">Close</button>
+                        <button type="submit" class="btn btn-lost" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+                            🚨 Dispatch Priority Alert to Security
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING SIH 2026 PRESENTATION GUIDED DOCK -->
+    <div class="demo-presentation-bar">
+        <span class="demo-title-tag">🚀 SIH Story</span>
+        <div class="demo-step-pills">
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(1)">1. Shiva Lost AirPods</button>
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(2)">2. Priya Found</button>
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(3)">3. Smart Match</button>
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(4)">4. Submit Claim</button>
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(5)">5. Admin Verifies</button>
+            <button class="demo-step-pill" onclick="DemoStory.executeStep(6)">6. Returned ✓</button>
+        </div>
+        <button class="btn btn-xs btn-primary whitespace-nowrap" onclick="DemoStory.nextStep()">
+            Next Step ➔
+        </button>
+        <button class="btn btn-xs btn-secondary" onclick="DemoStory.resetAll()" title="Reset Demo Data">
+            ↺ Reset
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/matching.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/sync-manager.js"></script>
+    <script src="js/demo-story.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
