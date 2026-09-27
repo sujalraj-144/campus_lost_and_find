@@ -1,10 +1,14 @@
 import os
 import sqlite3
 import json
+import tempfile
 from flask import Flask, request, jsonify, send_from_directory, send_file
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DB_PATH = os.path.join(BASE_DIR, "campusfind.db")
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_PATH = os.path.join(tempfile.gettempdir(), "campusfind.db")
+else:
+    DB_PATH = os.path.join(BASE_DIR, "campusfind.db")
 
 app = Flask(__name__, static_folder=BASE_DIR)
 
@@ -12,9 +16,8 @@ def ensure_db_initialized():
     if not os.path.exists(DB_PATH) or os.path.getsize(DB_PATH) == 0:
         print("[CampusFind] Database missing or empty. Auto-initializing with seed data...")
         try:
-            seed_script = os.path.join(os.path.dirname(__file__), "seed_data.py")
-            import subprocess
-            subprocess.run(["python", seed_script], check=True)
+            from backend.seed_data import seed_database
+            seed_database(DB_PATH)
         except Exception as e:
             print("[CampusFind] Auto-seed error:", e)
 
@@ -36,6 +39,13 @@ def add_cors_headers(response):
 # Static File Routes
 @app.route("/")
 def serve_index():
+    return send_file(os.path.join(BASE_DIR, "index.html"))
+
+@app.route("/<path:path>")
+def serve_static(path):
+    target = os.path.join(BASE_DIR, path)
+    if os.path.isfile(target):
+        return send_file(target)
     return send_file(os.path.join(BASE_DIR, "index.html"))
 
 # 1. Health
