@@ -364,10 +364,11 @@ window.CampusStore = {
         this.students = storedStudents ? JSON.parse(storedStudents) : JSON.parse(JSON.stringify(this.defaultStudents));
         this.emergencyAlerts = storedAlerts ? JSON.parse(storedAlerts) : [];
 
-        // Ensure all items have GPS latitude & longitude
+        // Ensure all items have GPS latitude & longitude within REAL TKR campus
         this.items = this.items.map(item => {
-            if (!item.lat || !item.lng) {
-                const gps = this.getLocationGPS(item.location);
+            const gps = this.getLocationGPS(item.location);
+            // If item has old longitude outside real campus (e.g. > 78.55), update it!
+            if (!item.lat || !item.lng || item.lng > 78.55 || item.lng < 78.52) {
                 item.lat = gps.lat;
                 item.lng = gps.lng;
             }
@@ -428,14 +429,14 @@ window.CampusStore = {
         proctorEmail: 'proctor@tkrcet.ac.in',
         website: 'https://tkrcet.ac.in',
         workingHours: 'Mon – Sat: 8:30 AM – 5:30 PM (Security 24x7)',
-        lat: 17.3230,
-        lng: 78.5580,
+        lat: 17.3235,
+        lng: 78.5362,
         googleMapsSearchUrl: 'https://www.google.com/maps/search/?api=1&query=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad',
-        googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad',
-        googleMapsEmbedUrl: 'https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed'
+        googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=17.3235,78.5362',
+        googleMapsEmbedUrl: 'https://maps.google.com/maps?q=17.3235,78.5362&t=m&z=17&ie=UTF8&iwloc=&output=embed'
     },
 
-    // Comprehensive TKRCET Campus Blocks, Facilities & Landmarks
+    // Comprehensive TKRCET Campus Blocks, Facilities & Landmarks (Real Campus Layout)
     campusBlocks: [
         {
             id: 'canteen',
@@ -446,8 +447,8 @@ window.CampusStore = {
             category: 'Dining & Refreshments',
             description: 'Central campus cafeteria serving breakfast, meals, snacks, and fresh juice, with an open-air shaded dining lawn.',
             locationDetail: 'Central campus pathway opposite Block A',
-            lat: 17.3223,
-            lng: 78.5574,
+            lat: 17.3232,
+            lng: 78.5358,
             timings: '8:00 AM – 6:30 PM',
             floorInfo: 'Ground Floor Dining Hall & Lawn',
             incharge: 'Mr. Ramesh (Canteen Manager)'
@@ -461,8 +462,8 @@ window.CampusStore = {
             category: 'Academic & Vault',
             description: 'Three-story library facility with quiet study carrels, digital research labs, and the official Ground Floor Lost Property Safe Locker.',
             locationDetail: 'West Campus Avenue adjacent to Admin Block',
-            lat: 17.3232,
-            lng: 78.5575,
+            lat: 17.3237,
+            lng: 78.5356,
             timings: '8:30 AM – 7:00 PM',
             floorInfo: 'Ground Fl: Property Vault • 1st & 2nd Fl: Reading Floors',
             incharge: 'Mr. Sudhakar (Chief Librarian - 040-2409 2556)'
@@ -476,8 +477,8 @@ window.CampusStore = {
             category: 'Engineering & Labs',
             description: 'Houses CSE, AI/ML, and IT departments with Software Labs 1 to 4, Cloud Computing Center, and Departmental Library.',
             locationDetail: 'North-East Academic Quadrangle',
-            lat: 17.3237,
-            lng: 78.5582,
+            lat: 17.3239,
+            lng: 78.5367,
             timings: '8:30 AM – 5:30 PM',
             floorInfo: '4 Floors: Labs 1-4, Server Room, HOD Chambers',
             incharge: 'Dr. Suresh Kumar (CSE HOD)'
@@ -491,8 +492,8 @@ window.CampusStore = {
             category: 'Academic & Labs',
             description: 'Hosts ECE, Mechanical, and Civil Engineering lecture rooms, Physics Lab 204, Mechanics Workshop, and Dean Office.',
             locationDetail: 'East Wing Academic Complex',
-            lat: 17.3228,
-            lng: 78.5585,
+            lat: 17.3231,
+            lng: 78.5367,
             timings: '8:30 AM – 5:30 PM',
             floorInfo: '3 Floors: Lecture Rooms 101-315 & Engineering Labs',
             incharge: 'Dr. N. Chandrasekhar (Academic Dean)'
@@ -506,8 +507,8 @@ window.CampusStore = {
             category: 'Events & Conferences',
             description: '1,200-seat central auditorium for national symposiums, hackathons, guest lectures, cultural fests, and campus placements.',
             locationDetail: 'Central Academic Quadrangle',
-            lat: 17.3229,
-            lng: 78.5588,
+            lat: 17.3234,
+            lng: 78.5374,
             timings: 'Open during scheduled events & symposiums',
             floorInfo: 'Auditorium Main Stage & Seminar Galleries A/B',
             incharge: 'Prof. K. Ravindra Reddy (Chief Proctor)'
@@ -521,8 +522,8 @@ window.CampusStore = {
             category: 'Sports & Athletics',
             description: 'Full-size cricket oval, football field, basketball court, athletic tracks, indoor badminton arena, and fitness gymnasium.',
             locationDetail: 'South-West Campus Perimeter',
-            lat: 17.3218,
-            lng: 78.5564,
+            lat: 17.3226,
+            lng: 78.5346,
             timings: '6:00 AM – 8:00 AM, 4:30 PM – 7:30 PM',
             floorInfo: 'Outdoor Grounds & Physical Education Pavilion',
             incharge: 'Mr. Srinivas (Physical Director)'
@@ -536,8 +537,8 @@ window.CampusStore = {
             category: 'Transit & Parking',
             description: 'Dedicated covered two-wheeler parking for students and faculty, alongside the 40+ fleet college bus terminus.',
             locationDetail: 'North Gate Perimeter & Main Entrance Road',
-            lat: 17.3242,
-            lng: 78.5588,
+            lat: 17.3244,
+            lng: 78.5372,
             timings: '7:30 AM – 6:30 PM (CCTV Monitored)',
             floorInfo: 'Bays A through E (Two-wheelers & College Buses)',
             incharge: 'Officer K. Narsimha (Security Gate 1)'
@@ -551,8 +552,8 @@ window.CampusStore = {
             category: 'Security & Custody',
             description: '24x7 Campus Security Central Station, CCTV surveillance hub, visitor screening desk, and primary Safe Custody Locker.',
             locationDetail: 'Main Campus Entrance, Medbowli Road',
-            lat: 17.3242,
-            lng: 78.5578,
+            lat: 17.3243,
+            lng: 78.5363,
             timings: '24 Hours / 7 Days Active',
             floorInfo: 'Security Cabin & Safe Custody Vault',
             incharge: 'Officer K. Narsimha (+91 91000 24001)'
@@ -566,8 +567,8 @@ window.CampusStore = {
             category: 'Medical & First Aid',
             description: 'On-campus first-aid dispensary, doctor consultation room, and 24x7 emergency medical triage and ambulance staging bay.',
             locationDetail: 'Near Sports Pavilion & Hostel Road',
-            lat: 17.3220,
-            lng: 78.5569,
+            lat: 17.3228,
+            lng: 78.5352,
             timings: '24 Hours Emergency Medical Assistance',
             floorInfo: 'Ground Floor Medical Unit',
             incharge: 'Dr. Ramesh (Medical Incharge - +91 91000 24005)'
@@ -575,25 +576,25 @@ window.CampusStore = {
     ],
 
     landmarksGPS: {
-        'Central Library': { lat: 17.3232, lng: 78.5575, x: 28, y: 38, name: 'TKR Central Library' },
-        'TKR Central Library': { lat: 17.3232, lng: 78.5575, x: 28, y: 38, name: 'TKR Central Library' },
-        'CSE Block': { lat: 17.3237, lng: 78.5582, x: 45, y: 22, name: 'CSE & IT Tech Block' },
-        'CSE & IT Tech Block': { lat: 17.3237, lng: 78.5582, x: 45, y: 22, name: 'CSE & IT Tech Block' },
-        'Block A': { lat: 17.3228, lng: 78.5585, x: 55, y: 62, name: 'Academic Block A' },
-        'Academic Block A': { lat: 17.3228, lng: 78.5585, x: 55, y: 62, name: 'Academic Block A' },
-        'Main Academic Block A': { lat: 17.3228, lng: 78.5585, x: 55, y: 62, name: 'Academic Block A' },
-        'Canteen': { lat: 17.3223, lng: 78.5574, x: 73, y: 72, name: 'TKR Student Canteen' },
-        'TKR Canteen': { lat: 17.3223, lng: 78.5574, x: 73, y: 72, name: 'TKR Student Canteen' },
-        'TKR Student Canteen': { lat: 17.3223, lng: 78.5574, x: 73, y: 72, name: 'TKR Student Canteen' },
-        'Parking': { lat: 17.3242, lng: 78.5588, x: 85, y: 28, name: 'Campus Parking Bays' },
-        'Campus Parking Bays': { lat: 17.3242, lng: 78.5588, x: 85, y: 28, name: 'Campus Parking Bays' },
-        'Sports Ground': { lat: 17.3218, lng: 78.5564, x: 18, y: 76, name: 'TKR Sports Ground' },
-        'TKR Sports Ground': { lat: 17.3218, lng: 78.5564, x: 18, y: 76, name: 'TKR Sports Ground' },
-        'Gate 1 Security': { lat: 17.3242, lng: 78.5578, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
-        'Security Gate 1 & Vault': { lat: 17.3242, lng: 78.5578, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
-        'Auditorium': { lat: 17.3229, lng: 78.5588, x: 60, y: 38, name: 'Main Auditorium' },
-        'Main Auditorium': { lat: 17.3229, lng: 78.5588, x: 60, y: 38, name: 'Main Auditorium' },
-        'Health Center': { lat: 17.3220, lng: 78.5569, x: 22, y: 72, name: 'Campus Health Center' }
+        'Central Library': { lat: 17.3237, lng: 78.5356, x: 28, y: 38, name: 'TKR Central Library' },
+        'TKR Central Library': { lat: 17.3237, lng: 78.5356, x: 28, y: 38, name: 'TKR Central Library' },
+        'CSE Block': { lat: 17.3239, lng: 78.5367, x: 45, y: 22, name: 'CSE & IT Tech Block' },
+        'CSE & IT Tech Block': { lat: 17.3239, lng: 78.5367, x: 45, y: 22, name: 'CSE & IT Tech Block' },
+        'Block A': { lat: 17.3231, lng: 78.5367, x: 55, y: 62, name: 'Academic Block A' },
+        'Academic Block A': { lat: 17.3231, lng: 78.5367, x: 55, y: 62, name: 'Academic Block A' },
+        'Main Academic Block A': { lat: 17.3231, lng: 78.5367, x: 55, y: 62, name: 'Academic Block A' },
+        'Canteen': { lat: 17.3232, lng: 78.5358, x: 73, y: 72, name: 'TKR Student Canteen' },
+        'TKR Canteen': { lat: 17.3232, lng: 78.5358, x: 73, y: 72, name: 'TKR Student Canteen' },
+        'TKR Student Canteen': { lat: 17.3232, lng: 78.5358, x: 73, y: 72, name: 'TKR Student Canteen' },
+        'Parking': { lat: 17.3244, lng: 78.5372, x: 85, y: 28, name: 'Campus Parking Bays' },
+        'Campus Parking Bays': { lat: 17.3244, lng: 78.5372, x: 85, y: 28, name: 'Campus Parking Bays' },
+        'Sports Ground': { lat: 17.3226, lng: 78.5346, x: 18, y: 76, name: 'TKR Sports Ground' },
+        'TKR Sports Ground': { lat: 17.3226, lng: 78.5346, x: 18, y: 76, name: 'TKR Sports Ground' },
+        'Gate 1 Security': { lat: 17.3243, lng: 78.5363, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
+        'Security Gate 1 & Vault': { lat: 17.3243, lng: 78.5363, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
+        'Auditorium': { lat: 17.3234, lng: 78.5374, x: 60, y: 38, name: 'Main Auditorium' },
+        'Main Auditorium': { lat: 17.3234, lng: 78.5374, x: 60, y: 38, name: 'Main Auditorium' },
+        'Health Center': { lat: 17.3228, lng: 78.5352, x: 22, y: 72, name: 'Campus Health Center' }
     },
 
     getDistanceToCollege(userLat, userLng) {
@@ -606,7 +607,7 @@ window.CampusStore = {
     },
 
     getLocationGPS(locationName) {
-        return this.landmarksGPS[locationName] || { lat: 17.3230, lng: 78.5580, x: 50, y: 50, name: locationName || 'TKRCET Campus' };
+        return this.landmarksGPS[locationName] || { lat: 17.3235, lng: 78.5362, x: 50, y: 50, name: locationName || 'TKRCET Campus' };
     },
 
     calculateDistanceMeters(lat1, lon1, lat2, lon2) {

@@ -610,8 +610,8 @@ window.App = {
                 const secret = document.getElementById('lost-secret').value;
                 const image_url = document.getElementById('lost-image-url').value || 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&auto=format&fit=crop&q=80';
 
-                const lat = parseFloat(document.getElementById('lost-lat')?.value) || 17.3232;
-                const lng = parseFloat(document.getElementById('lost-lng')?.value) || 78.5575;
+                const lat = parseFloat(document.getElementById('lost-lat')?.value) || 17.3235;
+                const lng = parseFloat(document.getElementById('lost-lng')?.value) || 78.5362;
 
                 const reportData = {
                     type: 'lost',
@@ -665,8 +665,8 @@ window.App = {
                 const description = document.getElementById('found-desc').value;
                 const secret = document.getElementById('found-secret').value;
                 const image_url = document.getElementById('found-image-url').value || 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&auto=format&fit=crop&q=80';
-                const lat = parseFloat(document.getElementById('found-lat')?.value) || 17.3232;
-                const lng = parseFloat(document.getElementById('found-lng')?.value) || 78.5575;
+                const lat = parseFloat(document.getElementById('found-lat')?.value) || 17.3235;
+                const lng = parseFloat(document.getElementById('found-lng')?.value) || 78.5362;
 
                 const reportData = {
                     type: 'found',
@@ -820,7 +820,7 @@ window.App = {
                     ` : ''}
 
                     <div class="modal-actions mt-6 flex items-center justify-end gap-3 flex-wrap">
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat || 17.3230},${item.lng || 78.5580}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat || 17.3235},${item.lng || 78.5362}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                             🗺️ Google Maps Directions
                         </a>
                         <button class="btn btn-secondary" onclick="App.closeAllModals()">Close</button>
@@ -1174,9 +1174,9 @@ window.App = {
         if (!mapContainer || this.leafletMap) return;
 
         try {
-            // TKRCET Meerpet Campus Center: 17.3230° N, 78.5580° E
+            // TKRCET Meerpet Campus Center: 17.3235° N, 78.5362° E
             this.leafletMap = L.map('leaflet-campus-map', {
-                center: [17.3230, 78.5580],
+                center: [17.3235, 78.5362],
                 zoom: 17,
                 minZoom: 15,
                 maxZoom: 19,
@@ -1213,13 +1213,14 @@ window.App = {
             this.tileLayers.google.addTo(this.leafletMap);
             this.currentMapLayer = 'google';
 
-            // TKRCET Campus Boundary Perimeter
+            // TKRCET Campus Boundary Perimeter (Survey No -8/A Medbowli, Meerpet)
             const campusPerimeter = [
-                [17.3248, 78.5562],
-                [17.3249, 78.5587],
-                [17.3238, 78.5599],
-                [17.3216, 78.5593],
-                [17.3212, 78.5564]
+                [17.3246, 78.5350],
+                [17.3247, 78.5375],
+                [17.3238, 78.5383],
+                [17.3223, 78.5372],
+                [17.3224, 78.5342],
+                [17.3236, 78.5341]
             ];
             L.polygon(campusPerimeter, {
                 color: '#38bdf8',
@@ -1231,16 +1232,16 @@ window.App = {
                 sticky: true
             });
 
-            // Landmark Chips across campus blocks
+            // Landmark Chips across campus blocks (Accurate GPS on campus grounds)
             const landmarkLabels = [
-                { name: '📚 Central Library', lat: 17.3232, lng: 78.5575 },
-                { name: '💻 CSE & IT Block', lat: 17.3237, lng: 78.5582 },
-                { name: '🏛️ Academic Block A', lat: 17.3228, lng: 78.5585 },
-                { name: '☕ TKR Canteen', lat: 17.3223, lng: 78.5574 },
-                { name: '🅿️ Parking Bays', lat: 17.3242, lng: 78.5588 },
-                { name: '🏏 Sports Ground', lat: 17.3218, lng: 78.5564 },
-                { name: '🛡️ Gate 1 Security', lat: 17.3242, lng: 78.5578 },
-                { name: '🎭 Main Auditorium', lat: 17.3229, lng: 78.5588 }
+                { name: '📚 Central Library', lat: 17.3237, lng: 78.5356 },
+                { name: '💻 CSE & IT Block', lat: 17.3239, lng: 78.5367 },
+                { name: '🏛️ Academic Block A', lat: 17.3231, lng: 78.5367 },
+                { name: '☕ TKR Canteen', lat: 17.3232, lng: 78.5358 },
+                { name: '🅿️ Parking Bays', lat: 17.3244, lng: 78.5372 },
+                { name: '🏏 Sports Ground', lat: 17.3226, lng: 78.5346 },
+                { name: '🛡️ Gate 1 Security', lat: 17.3243, lng: 78.5363 },
+                { name: '🎭 Main Auditorium', lat: 17.3234, lng: 78.5374 }
             ];
 
             landmarkLabels.forEach(lm => {
@@ -1360,7 +1361,7 @@ window.App = {
 
     centerTKRCET() {
         if (this.leafletMap) {
-            this.leafletMap.setView([17.3230, 78.5580], 17, { animate: true });
+            this.leafletMap.setView([17.3235, 78.5362], 17, { animate: true });
             this.showToast('🎯 Centered on TKREC / TKRCET (Survey No -8/A Medbowli, Meerpet, 500097)', 'info');
         }
     },
@@ -1394,8 +1395,8 @@ window.App = {
             const jitterLat = ((index % 5) - 2) * 0.00008;
             const jitterLng = (((index + 2) % 5) - 2) * 0.00008;
 
-            const lat = (item.lat || 17.3230) + jitterLat;
-            const lng = (item.lng || 78.5580) + jitterLng;
+            const lat = (item.lat || 17.3235) + jitterLat;
+            const lng = (item.lng || 78.5362) + jitterLng;
 
             const isEmerg = Boolean(item.is_emergency);
             const pinClass = isEmerg ? 'pin-emergency' : (item.type === 'lost' ? 'pin-lost' : 'pin-found');
@@ -1637,13 +1638,13 @@ window.App = {
 
     simulateCampusWalk() {
         const campusWaypoints = [
-            { name: 'Security Gate 1 & Vault', lat: 17.3242, lng: 78.5578, note: 'Entering TKRCET via Gate 1 Security Cabin' },
-            { name: 'TKR Central Library', lat: 17.3232, lng: 78.5575, note: 'Approaching Central Library & Quiet Study Hall' },
-            { name: 'CSE & IT Tech Block', lat: 17.3237, lng: 78.5582, note: 'Walking near CSE Block & AI Labs' },
-            { name: 'Academic Block A', lat: 17.3228, lng: 78.5585, note: 'Passing Academic Block A (ECE & Mech)' },
-            { name: 'Main Auditorium', lat: 17.3229, lng: 78.5588, note: 'Near Main Auditorium Seminar Hall' },
-            { name: 'TKR Student Canteen', lat: 17.3223, lng: 78.5574, note: 'Taking lunch break at TKR Student Canteen' },
-            { name: 'TKR Sports Ground', lat: 17.3218, lng: 78.5564, note: 'Near Cricket Oval & Sports Complex' }
+            { name: 'Security Gate 1 & Vault', lat: 17.3243, lng: 78.5363, note: 'Entering TKRCET via Gate 1 Security Cabin' },
+            { name: 'TKR Central Library', lat: 17.3237, lng: 78.5356, note: 'Approaching Central Library & Quiet Study Hall' },
+            { name: 'CSE & IT Tech Block', lat: 17.3239, lng: 78.5367, note: 'Walking near CSE Block & AI Labs' },
+            { name: 'Academic Block A', lat: 17.3231, lng: 78.5367, note: 'Passing Academic Block A (ECE & Mech)' },
+            { name: 'Main Auditorium', lat: 17.3234, lng: 78.5374, note: 'Near Main Auditorium Seminar Hall' },
+            { name: 'TKR Student Canteen', lat: 17.3232, lng: 78.5358, note: 'Taking lunch break at TKR Student Canteen' },
+            { name: 'TKR Sports Ground', lat: 17.3226, lng: 78.5346, note: 'Near Cricket Oval & Sports Complex' }
         ];
 
         if (this.simulationInterval !== null) {
@@ -1724,12 +1725,12 @@ window.App = {
                 },
                 (err) => {
                     this.showToast('GPS unavailable. Falling back to TKRCET Central Library location.', 'warning');
-                    applyLocation(17.3232, 78.5575, 15);
+                    applyLocation(17.3237, 78.5356, 15);
                 },
                 { enableHighAccuracy: true, timeout: 8000 }
             );
         } else {
-            applyLocation(17.3232, 78.5575, 15);
+            applyLocation(17.3237, 78.5356, 15);
         }
     },
 
@@ -1955,8 +1956,8 @@ window.App = {
         // Get initial coordinates from hidden input or default to Central Library
         const latInput = document.getElementById(`${type}-lat`);
         const lngInput = document.getElementById(`${type}-lng`);
-        const initLat = latInput ? parseFloat(latInput.value) || 17.3232 : 17.3232;
-        const initLng = lngInput ? parseFloat(lngInput.value) || 78.5575 : 78.5575;
+        const initLat = latInput ? parseFloat(latInput.value) || 17.3235 : 17.3235;
+        const initLng = lngInput ? parseFloat(lngInput.value) || 78.5362 : 78.5362;
 
         try {
             const map = L.map(mapContainerId, {
@@ -1990,13 +1991,14 @@ window.App = {
             // Default to Google Maps
             googleLayer.addTo(map);
 
-            // Campus boundary perimeter
+            // Campus boundary perimeter (Real TKRCET Grounds)
             const campusPerimeter = [
-                [17.3248, 78.5562],
-                [17.3249, 78.5587],
-                [17.3238, 78.5599],
-                [17.3216, 78.5593],
-                [17.3212, 78.5564]
+                [17.3246, 78.5350],
+                [17.3247, 78.5375],
+                [17.3238, 78.5383],
+                [17.3223, 78.5372],
+                [17.3224, 78.5342],
+                [17.3236, 78.5341]
             ];
             L.polygon(campusPerimeter, {
                 color: type === 'lost' ? '#ef4444' : '#10b981',
@@ -2008,14 +2010,14 @@ window.App = {
 
             // Campus landmark chips
             const landmarkLabels = [
-                { name: '📚 Library', key: 'Central Library', lat: 17.3232, lng: 78.5575 },
-                { name: '💻 CSE Block', key: 'CSE Block', lat: 17.3237, lng: 78.5582 },
-                { name: '🏛️ Block A', key: 'Block A', lat: 17.3228, lng: 78.5585 },
-                { name: '☕ Canteen', key: 'Canteen', lat: 17.3223, lng: 78.5574 },
-                { name: '🅿️ Parking', key: 'Parking', lat: 17.3242, lng: 78.5588 },
-                { name: '🏏 Ground', key: 'Sports Ground', lat: 17.3218, lng: 78.5564 },
-                { name: '🛡️ Gate 1', key: 'Gate 1 Security', lat: 17.3242, lng: 78.5578 },
-                { name: '🎭 Auditorium', key: 'Auditorium', lat: 17.3229, lng: 78.5588 }
+                { name: '📚 Library', key: 'Central Library', lat: 17.3237, lng: 78.5356 },
+                { name: '💻 CSE Block', key: 'CSE Block', lat: 17.3239, lng: 78.5367 },
+                { name: '🏛️ Block A', key: 'Block A', lat: 17.3231, lng: 78.5367 },
+                { name: '☕ Canteen', key: 'Canteen', lat: 17.3232, lng: 78.5358 },
+                { name: '🅿️ Parking', key: 'Parking', lat: 17.3244, lng: 78.5372 },
+                { name: '🏏 Ground', key: 'Sports Ground', lat: 17.3226, lng: 78.5346 },
+                { name: '🛡️ Gate 1', key: 'Gate 1 Security', lat: 17.3243, lng: 78.5363 },
+                { name: '🎭 Auditorium', key: 'Auditorium', lat: 17.3234, lng: 78.5374 }
             ];
 
             landmarkLabels.forEach(lm => {
@@ -2460,15 +2462,15 @@ window.App = {
     },
 
     copyCampusCoordinates() {
-        const text = '17.3230, 78.5580';
+        const text = '17.3235, 78.5362';
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text).then(() => {
-                this.showToast('📋 Copied TKRCET coordinates (17.3230° N, 78.5580° E) to clipboard!', 'success');
+                this.showToast('📋 Copied TKRCET coordinates (17.3235° N, 78.5362° E) to clipboard!', 'success');
             }).catch(() => {
-                this.showToast('Coordinates: 17.3230, 78.5580', 'info');
+                this.showToast('Coordinates: 17.3235, 78.5362', 'info');
             });
         } else {
-            this.showToast('Coordinates: 17.3230, 78.5580', 'info');
+            this.showToast('Coordinates: 17.3235, 78.5362', 'info');
         }
     },
 
@@ -2512,7 +2514,7 @@ window.App = {
         if (!this.visitLeafletMap) {
             try {
                 this.visitLeafletMap = L.map('visit-leaflet-map', {
-                    center: [17.3230, 78.5580],
+                    center: [17.3235, 78.5362],
                     zoom: 17,
                     minZoom: 15,
                     maxZoom: 19
@@ -2555,10 +2557,10 @@ window.App = {
     centerTKRCETOnVisitMap() {
         const iframe = document.getElementById('iframe-google-map');
         if (iframe) {
-            iframe.src = 'https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed';
+            iframe.src = 'https://maps.google.com/maps?q=17.3235,78.5362&t=m&z=17&ie=UTF8&iwloc=&output=embed';
         }
         if (this.visitLeafletMap) {
-            this.visitLeafletMap.setView([17.3230, 78.5580], 17, { animate: true });
+            this.visitLeafletMap.setView([17.3235, 78.5362], 17, { animate: true });
         }
         this.showToast('🎯 Centered on TKR College of Engineering & Technology', 'info');
     },
