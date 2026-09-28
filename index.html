@@ -35,6 +35,8 @@
                     <li><a class="nav-link" data-view="report-lost">Report Lost</a></li>
                     <li><a class="nav-link" data-view="report-found">Report Found</a></li>
                     <li><a class="nav-link" data-view="dashboard">My Activity</a></li>
+                    <li><a class="nav-link" href="#section-campus-visit" onclick="App.scrollToVisitSection(event)">📍 Visit Campus</a></li>
+                    <li><a class="nav-link" data-view="login" id="nav-login-link">🔐 Login / SSO</a></li>
                     <li id="nav-admin-link" class="hidden"><a class="nav-link" data-view="admin">🛡️ Admin Center</a></li>
                 </ul>
             </nav>
@@ -79,19 +81,25 @@
                     <select id="persona-select" class="persona-select">
                         <option value="shiva">Shiva (22K91A0542 - CSE)</option>
                         <option value="priya">Priya (23K91A0415 - ECE)</option>
+                        <option value="rahul">Rahul (22K91A6620 - CSM)</option>
                         <option value="admin">Prof. K. Ravindra Reddy (Proctor)</option>
                         <option value="security">Officer K. Narsimha (Security)</option>
                     </select>
                 </div>
 
                 <!-- User profile preview -->
-                <div class="user-profile-pill">
+                <div class="user-profile-pill" onclick="App.switchView('login')" style="cursor: pointer;" title="Click to view SSO Login Portal">
                     <img id="user-avatar" src="" alt="Avatar" class="user-avatar-img">
                     <div style="display: flex; flex-direction: column; text-align: left;">
                         <span id="user-display-name" style="font-size: 0.8rem; font-weight: 700; line-height: 1.1;">Shiva Kumar</span>
                         <span id="user-display-role" style="font-size: 0.68rem; color: var(--primary);">22K91A0542 • CSE</span>
                     </div>
                 </div>
+
+                <!-- Header Logout Button -->
+                <button id="btn-header-logout" class="btn btn-xs btn-outline" onclick="App.logoutUser()" title="Sign out of current session" style="white-space: nowrap;">
+                    🚪 Sign Out
+                </button>
             </div>
         </div>
     </header>
@@ -389,41 +397,239 @@
                 </div>
             </div>
 
-            <!-- Official College Campus Location & Address Card -->
-            <div class="container" style="margin-bottom: 50px;">
-                <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 22px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <div style="font-size: 36px; background: rgba(56, 189, 248, 0.1); width: 62px; height: 62px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(56, 189, 248, 0.3);">
-                                🏛️
-                            </div>
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0;">Teegala Krishna Reddy Engineering College (TKREC / TKRCET)</h3>
-                                    <span class="badge badge-info" style="font-size: 0.68rem;">Verified Official Location</span>
+            <!-- ======================================================== -->
+            <!-- SECTION: VISIT OUR CAMPUS / FIND US (GOOGLE MAPS & BLOCKS) -->
+            <!-- ======================================================== -->
+            <section id="section-campus-visit" class="campus-visit-section">
+                <div class="container">
+                    <!-- Section Header -->
+                    <div class="section-header" style="text-align: center; max-width: 780px; margin: 0 auto 36px auto;">
+                        <div class="hero-badge-pill" style="margin-bottom: 12px;">
+                            <span>📍 Official Campus Location & Map</span>
+                        </div>
+                        <h2 class="section-title" style="font-size: 2.1rem;">
+                            Visit Our Campus <span style="color: var(--primary); font-weight: 400;">|</span> Find Us
+                        </h2>
+                        <p class="section-subtitle" style="font-size: 0.95rem;">
+                            Explore Teegala Krishna Reddy Engineering College (TKREC / TKRCET), locate campus blocks like the student canteen, library, and engineering departments, or detect your live distance.
+                        </p>
+                    </div>
+
+                    <!-- 2-Column Responsive Layout: Information Card + Google Map -->
+                    <div class="campus-visit-grid">
+                        
+                        <!-- Column 1: College Information & Blocks Card -->
+                        <div class="campus-info-card">
+                            <!-- Card Header -->
+                            <div class="campus-info-header">
+                                <div class="campus-crest-icon">🏛️</div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="campus-title-main">TKR College of Engineering & Technology</h3>
+                                        <span class="badge badge-info text-xs">Autonomous</span>
+                                    </div>
+                                    <p class="campus-subtitle">Approved by AICTE • Affiliated to JNTUH • Accredited by NBA & NAAC 'A' Grade</p>
                                 </div>
-                                <p style="font-size: 0.88rem; color: #cbd5e1; margin-top: 4px; margin-bottom: 4px;">
-                                    📍 <strong>Official Address:</strong> Survey No -8/A Medbowli, Meerpet, Telangana 500097
-                                </p>
-                                <div style="font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                    <span>🌐 <strong>Exact GPS:</strong> <span style="color: #38bdf8; font-family: monospace;">17.3230° N, 78.5580° E</span></span>
-                                    <span>📮 <strong>PIN:</strong> 500097</span>
-                                    <span>🏛️ <strong>Mandal:</strong> Meerpet, Balapur / Saroornagar, Ranga Reddy District</span>
+                            </div>
+
+                            <!-- Verified Address & GPS Box -->
+                            <div class="campus-address-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="campus-loc-pin-icon" aria-hidden="true">📍</span>
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Campus Address</div>
+                                        <div class="campus-address-text">
+                                            <strong>TKR College of Engineering & Technology</strong><br>
+                                            Medbowli, Meerpet, Saroornagar,<br>
+                                            Hyderabad – 500097, Telangana, India
+                                        </div>
+                                        <div class="campus-survey-sub">
+                                            <span>🏛️ Survey No -8/A Medbowli</span>
+                                            <span class="bullet-dot">•</span>
+                                            <span>📮 PIN: 500097</span>
+                                            <span class="bullet-dot">•</span>
+                                            <span>Mandal: Meerpet</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- GPS Coordinates Pill -->
+                                <div class="campus-gps-pill">
+                                    <span class="gps-label">🌐 Exact Coordinates:</span>
+                                    <code class="gps-val">17.3230° N, 78.5580° E</code>
+                                    <button type="button" class="btn-copy-gps" onclick="App.copyCampusCoordinates()" title="Copy GPS coordinates" aria-label="Copy GPS coordinates">
+                                        📋 Copy
+                                    </button>
                                 </div>
                             </div>
+
+                            <!-- Contact & Timings Grid -->
+                            <div class="campus-contact-grid">
+                                <div class="contact-item">
+                                    <span class="contact-icon" aria-hidden="true">📞</span>
+                                    <div class="contact-details">
+                                        <span class="contact-label">College Reception</span>
+                                        <a href="tel:04024092555" class="contact-val" title="Call TKRCET Reception">040-2409 2555</a>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <span class="contact-icon" aria-hidden="true">🛡️</span>
+                                    <div class="contact-details">
+                                        <span class="contact-label">Gate 1 Security Hotline</span>
+                                        <a href="tel:+919100024001" class="contact-val" title="Call Security Control Room">+91 91000 24001</a>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <span class="contact-icon" aria-hidden="true">✉️</span>
+                                    <div class="contact-details">
+                                        <span class="contact-label">Official Email</span>
+                                        <a href="mailto:info@tkrcet.ac.in" class="contact-val" title="Email TKRCET Admissions & Info">info@tkrcet.ac.in</a>
+                                    </div>
+                                </div>
+
+                                <div class="contact-item">
+                                    <span class="contact-icon" aria-hidden="true">🕒</span>
+                                    <div class="contact-details">
+                                        <span class="contact-label">Working Hours</span>
+                                        <span class="contact-val-text">Mon–Sat: 8:30AM–5:30PM</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Location Detection Tool -->
+                            <div class="campus-detect-location-box">
+                                <div class="detect-header">
+                                    <div class="flex items-center gap-2">
+                                        <span class="pulse-radar-dot"></span>
+                                        <span class="detect-title">Live Geolocation Radar</span>
+                                    </div>
+                                    <button type="button" id="btn-detect-user-location" class="btn btn-sm btn-primary" onclick="App.detectUserCampusLocation()" aria-label="Detect my current location">
+                                        📍 Detect My Location
+                                    </button>
+                                </div>
+                                <div id="detect-location-status" class="detect-status-idle">
+                                    <span>Click <strong>"Detect My Location"</strong> to calculate your precise distance to TKR College and discover which campus block is closest to you.</span>
+                                </div>
+                            </div>
+
+                            <!-- Primary CTA Action Buttons -->
+                            <div class="campus-cta-row">
+                                <a href="https://www.google.com/maps/dir/?api=1&destination=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="btn btn-primary btn-get-directions"
+                                   title="Get directions to TKR College of Engineering & Technology on Google Maps"
+                                   aria-label="Get directions to TKR College of Engineering & Technology on Google Maps">
+                                    🧭 Get Directions
+                                </a>
+
+                                <a href="https://www.google.com/maps/search/?api=1&query=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   class="btn btn-secondary btn-search-maps"
+                                   title="Open TKR College of Engineering & Technology on Google Maps"
+                                   aria-label="Open TKR College of Engineering & Technology on Google Maps">
+                                    🗺️ Open in Google Maps
+                                </a>
+                            </div>
+
+                            <!-- Campus Blocks & Landmarks Quick Explorer -->
+                            <div class="campus-blocks-explorer">
+                                <div class="blocks-header">
+                                    <div>
+                                        <h4 class="blocks-title">Campus Blocks & Landmarks</h4>
+                                        <p class="blocks-subtitle">Click any block to highlight on map & get details</p>
+                                    </div>
+                                    <span class="blocks-count-badge">9 Key Locations</span>
+                                </div>
+
+                                <div class="blocks-chip-grid" id="campus-blocks-chip-container">
+                                    <!-- Populated dynamically with blocks: Canteen, Central Library, CSE Block, Block A, Auditorium, Sports Ground, Parking, Security Gate 1, Health Center -->
+                                </div>
+
+                                <!-- Selected Block Detail Popout -->
+                                <div id="selected-block-info" class="selected-block-card hidden">
+                                    <!-- Populated when user clicks any block chip -->
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <a href="https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.82rem;">
-                                🗺️ Open in Google Maps
-                            </a>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.82rem;">
-                                🧭 Navigate to College
-                            </a>
+                        <!-- Column 2: Large Responsive Google Map with Map Layer Toggles -->
+                        <div class="campus-map-embed-container">
+                            <!-- Map Top Bar: View Mode Switcher -->
+                            <div class="map-embed-toolbar">
+                                <div class="flex items-center gap-2">
+                                    <span class="live-dot-green"></span>
+                                    <span class="map-toolbar-title" id="map-active-view-label">Official Google Maps View</span>
+                                </div>
+                                <div class="map-view-switcher-pills">
+                                    <button type="button" class="embed-toggle-btn active" id="btn-toggle-embed-gmap" onclick="App.switchCampusMapView('gmap')" title="Official Google Maps interactive view">
+                                        🗺️ Google Maps
+                                    </button>
+                                    <button type="button" class="embed-toggle-btn" id="btn-toggle-embed-sat" onclick="App.switchCampusMapView('satellite')" title="Google Maps Satellite Hybrid imagery">
+                                        🌍 Satellite
+                                    </button>
+                                    <button type="button" class="embed-toggle-btn" id="btn-toggle-embed-interactive" onclick="App.switchCampusMapView('interactive')" title="Campus Explorer with items & live pins">
+                                        🧭 Interactive Explorer
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Frame 1: Responsive Google Map Iframe (Default) -->
+                            <div id="wrapper-gmap-embed" class="map-frame-wrapper">
+                                <iframe 
+                                    id="iframe-google-map"
+                                    src="https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed" 
+                                    title="Google Map showing the location of TKR College of Engineering & Technology" 
+                                    class="responsive-gmap-iframe"
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+
+                            <!-- Frame 2: Google Maps Satellite View -->
+                            <div id="wrapper-gmap-satellite" class="map-frame-wrapper hidden">
+                                <iframe 
+                                    id="iframe-google-satellite"
+                                    src="https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=k&z=18&ie=UTF8&iwloc=&output=embed" 
+                                    title="Google Maps Satellite View of TKR College of Engineering & Technology" 
+                                    class="responsive-gmap-iframe"
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+
+                            <!-- Frame 3: Interactive Leaflet Campus Explorer with items, blocks, and live GPS pin -->
+                            <div id="wrapper-interactive-explorer" class="map-frame-wrapper hidden">
+                                <div id="visit-leaflet-map" style="width: 100%; height: 100%; min-height: 480px;"></div>
+                            </div>
+
+                            <!-- Map Footer Bar: Quick Links & Address Verification -->
+                            <div class="map-embed-footer">
+                                <div class="flex items-center gap-2 text-xs text-slate-300">
+                                    <span>📍</span>
+                                    <span><strong>TKR College of Engineering & Technology</strong> • Medbowli, Meerpet, Hyderabad 500097</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="btn btn-xs btn-outline" onclick="App.centerTKRCETOnVisitMap()" title="Center map on campus">
+                                        🎯 Center College
+                                    </button>
+                                    <a href="https://www.google.com/maps/search/?api=1&query=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-primary text-xs" style="text-decoration: none;">
+                                        ↗️ Open Google Maps
+                                    </a>
+                                </div>
+                            </div>
+
                         </div>
+
                     </div>
                 </div>
-            </div>
+            </section>
         </section>
 
         <!-- VIEW 2: STUDENT DASHBOARD -->
@@ -968,6 +1174,207 @@
                 <div id="admin-pane-emergency" class="admin-tab-pane hidden">
                     <div id="admin-emergency-list">
                         <!-- Populated dynamically by App.renderAdminEmergencies() -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW: CAMPUS SSO LOGIN PORTAL -->
+        <section id="view-login" class="view-container hidden">
+            <div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+                <div class="sso-portal-card">
+                    <!-- SSO Portal Header with University Branding -->
+                    <div class="sso-header">
+                        <div class="sso-crest-box">
+                            <span style="font-size: 38px;">🏛️</span>
+                        </div>
+                        <div class="sso-branding-info">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 class="sso-title">TKRCET Campus Single Sign-On</h1>
+                                <span class="badge badge-info" style="font-size: 0.7rem;">Auth v2.6</span>
+                            </div>
+                            <p class="sso-subtitle">TKR College of Engineering & Technology (Autonomous) • Central Identity Provider</p>
+                        </div>
+                    </div>
+
+                    <!-- Role Tab Toggle: Student SSO vs Proctor/Admin SSO -->
+                    <div class="sso-tabs-container">
+                        <button type="button" class="sso-tab-btn active" id="tab-sso-student" onclick="App.switchSSOTab('student')">
+                            🎓 Student Portal SSO
+                        </button>
+                        <button type="button" class="sso-tab-btn" id="tab-sso-admin" onclick="App.switchSSOTab('admin')">
+                            🛡️ Faculty & Proctor SSO
+                        </button>
+                    </div>
+
+                    <!-- SSO Body Area -->
+                    <div class="sso-body">
+                        <!-- PANE 1: STUDENT LOGIN -->
+                        <div id="pane-sso-student" class="sso-pane">
+                            <div class="sso-pane-intro">
+                                <h3>Student Identity Verification</h3>
+                                <p>Sign in with your official JNTUH-format TKRCET Hall Ticket / Roll Number or your college G-Suite account to report items and submit claims.</p>
+                            </div>
+
+                            <form id="form-sso-student" onsubmit="App.handleStudentLogin(event)">
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-student-roll">TKRCET Roll / Hall Ticket Number *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">🎓</span>
+                                        <input type="text" id="sso-student-roll" class="form-input" required placeholder="e.g. 22K91A0542 or 23K91A0415" value="22K91A0542" oninput="App.validateSSORoll(this.value)">
+                                    </div>
+                                    <div id="sso-roll-badge" class="roll-validation-badge roll-valid" style="margin-top: 6px;">
+                                        ✅ Verified TKRCET Student: Shiva Kumar (B.Tech CSE - 3rd Year)
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-student-email">College Email Address *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">✉️</span>
+                                        <input type="email" id="sso-student-email" class="form-input" required placeholder="e.g. rollno@tkrcet.ac.in" value="shiva.22cse@tkrcet.ac.in">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-student-password">Student Portal Password / PIN *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">🔒</span>
+                                        <input type="password" id="sso-student-password" class="form-input" required placeholder="Enter student PIN (e.g. ••••••••)" value="tkrcet2026">
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 0.78rem;">
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-muted);">
+                                        <input type="checkbox" checked style="accent-color: var(--primary);"> Remember session on this device
+                                    </label>
+                                    <a href="javascript:void(0)" onclick="App.showToast('Student PIN reset links are dispatched to registered mobile via TKRCET ERP.', 'info')" style="color: #38bdf8; text-decoration: none;">Forgot PIN?</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700;">
+                                    🚀 Sign In to Student Portal
+                                </button>
+                            </form>
+
+                            <div class="sso-divider">
+                                <span>OR SIGN IN WITH COLLEGE WORKSPACE</span>
+                            </div>
+
+                            <button type="button" class="btn-sso-google" onclick="App.loginWithGoogleWorkspace('shiva')">
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                                </svg>
+                                Sign In via TKRCET Google Workspace (@tkrcet.ac.in)
+                            </button>
+
+                            <!-- Quick 1-Click Profile Evaluation Cards -->
+                            <div class="sso-quick-profiles">
+                                <span class="sso-quick-title">⚡ Instant 1-Click Student Login (Evaluation Accounts):</span>
+                                <div class="sso-profiles-grid">
+                                    <div class="sso-profile-card" onclick="App.quickLoginSSO('shiva')">
+                                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80" alt="Shiva" class="sso-avatar">
+                                        <div class="sso-profile-info">
+                                            <div style="font-weight: 700; color: #fff; font-size: 0.85rem;">Shiva Kumar</div>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; font-family: monospace;">22K91A0542 • CSE</div>
+                                        </div>
+                                        <span class="badge badge-primary text-[10px]">Select</span>
+                                    </div>
+
+                                    <div class="sso-profile-card" onclick="App.quickLoginSSO('priya')">
+                                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80" alt="Priya" class="sso-avatar">
+                                        <div class="sso-profile-info">
+                                            <div style="font-weight: 700; color: #fff; font-size: 0.85rem;">Priya Sharma</div>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; font-family: monospace;">23K91A0415 • ECE</div>
+                                        </div>
+                                        <span class="badge badge-primary text-[10px]">Select</span>
+                                    </div>
+
+                                    <div class="sso-profile-card" onclick="App.quickLoginSSO('rahul')">
+                                        <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80" alt="Rahul" class="sso-avatar">
+                                        <div class="sso-profile-info">
+                                            <div style="font-weight: 700; color: #fff; font-size: 0.85rem;">Rahul Varma</div>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; font-family: monospace;">22K91A6620 • CSM</div>
+                                        </div>
+                                        <span class="badge badge-primary text-[10px]">Select</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 2: FACULTY & PROCTOR LOGIN -->
+                        <div id="pane-sso-admin" class="sso-pane hidden">
+                            <div class="sso-pane-intro">
+                                <h3>Proctor & Security Administration Access</h3>
+                                <p>Restricted to authorized faculty, Dean Student Affairs, and Gate 1 Campus Security Officers for claim adjudication and vault clearances.</p>
+                            </div>
+
+                            <form id="form-sso-admin" onsubmit="App.handleAdminLogin(event)">
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-admin-id">Institutional Faculty / Staff ID *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">🛡️</span>
+                                        <input type="text" id="sso-admin-id" class="form-input" required placeholder="e.g. EMP-TKR-01 or SEC-TKR-09" value="EMP-TKR-01">
+                                    </div>
+                                    <p class="form-hint">Staff credentials issued by TKRCET Human Resources / Registrar.</p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-admin-email">Official Institutional Email *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">✉️</span>
+                                        <input type="email" id="sso-admin-email" class="form-input" required placeholder="e.g. proctor@tkrcet.ac.in" value="proctor@tkrcet.ac.in">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-admin-password">Administrative Security Key *</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">🔑</span>
+                                        <input type="password" id="sso-admin-password" class="form-input" required placeholder="Enter administrative passcode" value="admin123">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="sso-admin-2fa">2-Factor Authentication Code (2FA)</label>
+                                    <div class="input-icon-wrap">
+                                        <span class="input-icon">📱</span>
+                                        <input type="text" id="sso-admin-2fa" class="form-input" placeholder="TKR-PROCTOR-2026" value="TKR-PROCTOR-2026">
+                                    </div>
+                                    <p class="form-hint">Evaluator Passcode pre-filled: <code style="color: #38bdf8;">TKR-PROCTOR-2026</code></p>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #0284c7, #0369a1);">
+                                    🛡️ Unlock Proctor & Admin Console
+                                </button>
+                            </form>
+
+                            <!-- Quick 1-Click Staff Profile Cards -->
+                            <div class="sso-quick-profiles">
+                                <span class="sso-quick-title">⚡ Instant 1-Click Proctor Login (Evaluation Accounts):</span>
+                                <div class="sso-profiles-grid">
+                                    <div class="sso-profile-card" onclick="App.quickLoginSSO('admin')">
+                                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80" alt="Prof Reddy" class="sso-avatar">
+                                        <div class="sso-profile-info">
+                                            <div style="font-weight: 700; color: #fff; font-size: 0.85rem;">Prof. K. Ravindra Reddy</div>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; font-family: monospace;">EMP-TKR-01 • Chief Proctor</div>
+                                        </div>
+                                        <span class="badge badge-warning text-[10px]">Proctor</span>
+                                    </div>
+
+                                    <div class="sso-profile-card" onclick="App.quickLoginSSO('security')">
+                                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&auto=format&fit=crop&q=80" alt="Officer Narsimha" class="sso-avatar">
+                                        <div class="sso-profile-info">
+                                            <div style="font-weight: 700; color: #fff; font-size: 0.85rem;">Officer K. Narsimha</div>
+                                            <div style="font-size: 0.72rem; color: #38bdf8; font-family: monospace;">SEC-TKR-09 • Security Gate 1</div>
+                                        </div>
+                                        <span class="badge badge-warning text-[10px]">Security</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

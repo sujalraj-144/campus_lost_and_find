@@ -83,6 +83,7 @@ window.App = {
         this.renderCampusMap();
         this.renderRecentLandingItems();
         this.renderCampusHotspots();
+        this.renderCampusBlocksChips();
         this.renderBrowseItems();
         this.renderDashboard();
         this.renderAdmin();
@@ -92,6 +93,14 @@ window.App = {
     },
 
     switchView(viewName) {
+        // Protect Admin view: require admin role
+        if (viewName === 'admin' && CampusStore.currentUser.role !== 'admin') {
+            this.showToast('🛡️ Admin Center requires Proctor / Security credentials. Please sign in via Faculty SSO.', 'warning');
+            this.switchView('login');
+            this.switchSSOTab('admin');
+            return;
+        }
+
         this.currentView = viewName;
         window.location.hash = viewName;
 
@@ -122,6 +131,7 @@ window.App = {
         } else if (viewName === 'landing') {
             this.renderStats();
             this.renderRecentLandingItems();
+            this.renderCampusBlocksChips();
             if (this.leafletMap) {
                 setTimeout(() => {
                     this.leafletMap.invalidateSize();
@@ -135,6 +145,8 @@ window.App = {
             setTimeout(() => {
                 this.initPickerMap('found');
             }, 150);
+        } else if (viewName === 'login') {
+            this.renderSSOPortal();
         }
     },
 
@@ -178,9 +190,15 @@ window.App = {
         const roleEl = document.getElementById('user-display-role');
         const avatarEl = document.getElementById('user-avatar');
         const adminNavLink = document.getElementById('nav-admin-link');
+        const logoutBtn = document.getElementById('btn-header-logout');
+        const personaSelect = document.getElementById('persona-select');
 
         if (nameEl) nameEl.textContent = user.name;
-        if (roleEl) roleEl.textContent = user.role === 'admin' ? '🛡️ Proctor / Admin' : '🎓 Student';
+        if (roleEl) {
+            roleEl.textContent = user.role === 'admin' 
+                ? '🛡️ Proctor / Admin' 
+                : `${user.roll_no || 'Student'} • ${user.department ? user.department.split(' ')[0] : 'CSE'}`;
+        }
         if (avatarEl) avatarEl.src = user.avatar;
 
         if (adminNavLink) {
@@ -189,6 +207,15 @@ window.App = {
             } else {
                 adminNavLink.classList.add('hidden');
             }
+        }
+
+        if (personaSelect) {
+            const key = Object.keys(CampusStore.personas).find(k => CampusStore.personas[k].roll_no === user.roll_no) || 'shiva';
+            personaSelect.value = key;
+        }
+
+        if (logoutBtn) {
+            logoutBtn.classList.remove('hidden');
         }
     },
 
@@ -2193,6 +2220,460 @@ window.App = {
             }
             this.showToast(`📍 Pin placed at ${buildingName}!`, 'info');
         }, 220);
+    },
+
+    /* =========================================================
+       VISIT OUR CAMPUS & FIND US - GOOGLE MAPS & BLOCKS METHODS
+       ========================================================= */
+
+    selectedBlockId: null,
+
+    renderCampusBlocksChips() {
+        const container = document.getElementById('campus-blocks-chip-container');
+        if (!container) return;
+
+        const blocks = CampusStore.campusBlocks || [];
+        container.innerHTML = blocks.map(b => `
+            <button type="button" class="block-chip-btn ${this.selectedBlockId === b.id ? 'active' : ''}" id="block-chip-${b.id}" onclick="App.selectCampusBlock('${b.id}')" title="${b.name}">
+                <span style="font-size: 1.1rem; line-height: 1;">${b.icon}</span>
+                <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${b.shortName || b.name}</span>
+            </button>
+        `).join('');
+
+        if (!this.selectedBlockId && blocks.length > 0) {
+            this.selectCampusBlock('canteen');
+        }
+    },
+
+    selectCampusBlock(blockId) {
+        const blocks = CampusStore.campusBlocks || [];
+        const block = blocks.find(b => b.id === blockId) || blocks[0];
+        if (!block) return;
+
+        this.selectedBlockId = block.id;
+
+        document.querySelectorAll('.block-chip-btn').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.getElementById(`block-chip-${block.id}`);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        const card = document.getElementById('selected-block-info');
+        if (card) {
+            card.classList.remove('hidden');
+
+            let userDistanceHtml = '';
+            if (this.userGPSLocation) {
+                const dist = CampusStore.calculateDistanceMeters(this.userGPSLocation.lat, this.userGPSLocation.lng, block.lat, block.lng);
+                if (dist !== null) {
+                    const distText = dist < 1000 ? `${dist}m` : `${(dist / 1000).toFixed(2)} km`;
+                    userDistanceHtml = `<span style="background: rgba(14, 165, 233, 0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.7rem;">📏 ${distText} from you</span>`;
+                }
+            }
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <div>
+                        <div style="font-size: 0.95rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">
+                            <span>${block.icon}</span>
+                            <span>${block.name}</span>
+                        </div>
+                        <span class="badge badge-info" style="margin-top: 2px; font-size: 0.65rem;">${block.category}</span>
+                    </div>
+                    ${userDistanceHtml}
+                </div>
+                <p style="color: #cbd5e1; font-size: 0.76rem; margin: 4px 0; line-height: 1.45;">${block.description}</p>
+                <div style="font-size: 0.72rem; color: #94a3b8; display: flex; flex-direction: column; gap: 3px; background: rgba(0,0,0,0.25); padding: 8px 10px; border-radius: 8px;">
+                    <div>📍 <strong>Location:</strong> ${block.locationDetail}</div>
+                    <div>🕒 <strong>Hours:</strong> ${block.timings} • <strong>Floor:</strong> ${block.floorInfo}</div>
+                    <div>👤 <strong>In-Charge:</strong> ${block.incharge}</div>
+                    <div>🌐 <strong>Exact GPS:</strong> <span style="font-family: monospace; color: #38bdf8;">${block.lat.toFixed(4)}° N, ${block.lng.toFixed(4)}° E</span></div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${block.lat},${block.lng}" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-primary" style="flex: 1; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 4px;" title="Get directions to ${block.name} on Google Maps">
+                        🧭 Directions to ${block.shortName}
+                    </a>
+                    <button type="button" class="btn btn-xs btn-secondary" style="flex: 1;" onclick="App.centerMapOnBlock('${block.id}')">
+                        🎯 Focus Map Here
+                    </button>
+                </div>
+            `;
+        }
+    },
+
+    centerMapOnBlock(blockId) {
+        const blocks = CampusStore.campusBlocks || [];
+        const block = blocks.find(b => b.id === blockId);
+        if (!block) return;
+
+        if (this.leafletMap) {
+            this.leafletMap.setView([block.lat, block.lng], 18, { animate: true });
+        }
+        if (this.visitLeafletMap) {
+            this.visitLeafletMap.setView([block.lat, block.lng], 18, { animate: true });
+        }
+
+        const iframe = document.getElementById('iframe-google-map');
+        if (iframe) {
+            iframe.src = `https://maps.google.com/maps?q=${block.lat},${block.lng}&t=m&z=18&ie=UTF8&iwloc=&output=embed`;
+        }
+        const satIframe = document.getElementById('iframe-google-satellite');
+        if (satIframe) {
+            satIframe.src = `https://maps.google.com/maps?q=${block.lat},${block.lng}&t=k&z=19&ie=UTF8&iwloc=&output=embed`;
+        }
+
+        this.showToast(`🎯 Centered map on ${block.name}`, 'info');
+    },
+
+    detectUserCampusLocation() {
+        const statusBox = document.getElementById('detect-location-status');
+        const btn = document.getElementById('btn-detect-user-location');
+
+        if (!('geolocation' in navigator)) {
+            if (statusBox) {
+                statusBox.className = 'detect-status-active';
+                statusBox.innerHTML = '❌ Geolocation is not supported by your browser.';
+            }
+            this.showToast('Geolocation is not supported by this browser.', 'warning');
+            return;
+        }
+
+        if (btn) btn.innerHTML = '📡 Detecting...';
+        if (statusBox) {
+            statusBox.className = 'detect-status-active';
+            statusBox.innerHTML = '⏳ Requesting your device GPS position and measuring campus proximity...';
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude, accuracy } = pos.coords;
+                this.updateUserLiveLocation(latitude, longitude, accuracy, false);
+                if (btn) btn.innerHTML = '🟢 GPS Detected';
+
+                const distMeters = CampusStore.getDistanceToCollege(latitude, longitude);
+                const nearest = CampusStore.getNearestBuilding(latitude, longitude);
+
+                let distFormatted = '';
+                let proximityNote = '';
+                if (distMeters !== null) {
+                    if (distMeters < 1000) {
+                        distFormatted = `${distMeters} meters`;
+                        proximityNote = '📍 <strong>You are currently on or immediately adjacent to TKRCET Campus!</strong>';
+                    } else {
+                        distFormatted = `${(distMeters / 1000).toFixed(2)} km`;
+                        proximityNote = `🚗 You are approximately <strong>${distFormatted}</strong> away from TKR College.`;
+                    }
+                }
+
+                if (statusBox) {
+                    statusBox.className = 'detect-status-active';
+                    statusBox.innerHTML = `
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                                <span style="font-weight: 700; color: #38bdf8;">✅ Location Locked</span>
+                                <span style="font-family: monospace; font-size: 0.72rem; color: #94a3b8;">${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E (±${Math.round(accuracy)}m)</span>
+                            </div>
+                            <div style="color: #e2e8f0; font-size: 0.76rem;">${proximityNote}</div>
+                            ${nearest ? `<div style="font-size: 0.74rem; color: #7dd3fc;">🏛️ Closest Facility: <strong>${nearest.name}</strong> (${nearest.distance}m away)</div>` : ''}
+                            <div style="margin-top: 4px;">
+                                <a href="https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    🧭 Get Navigation Directions from My Current Location
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                this.showToast(`📍 Location detected: ${distFormatted} from TKRCET`, 'success');
+
+                if (this.selectedBlockId) {
+                    this.selectCampusBlock(this.selectedBlockId);
+                }
+            },
+            (err) => {
+                console.warn('[CampusFind GPS] Geolocation error:', err);
+                if (btn) btn.innerHTML = '📍 Detect My Location';
+                if (statusBox) {
+                    statusBox.className = 'detect-status-active';
+                    statusBox.innerHTML = `
+                        <div style="color: #fca5a5;">
+                            ⚠️ Device GPS unavailable (${err.message || 'Permission denied or timed out'}).
+                            <div style="margin-top: 4px; font-size: 0.72rem; color: #cbd5e1;">
+                                Click <strong>"🚶 Walk on Campus"</strong> in the top map toolbar to test simulated movement, or click any campus block below.
+                            </div>
+                        </div>
+                    `;
+                }
+                this.showToast('Device GPS permission denied or timed out.', 'warning');
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    },
+
+    copyCampusCoordinates() {
+        const text = '17.3230, 78.5580';
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                this.showToast('📋 Copied TKRCET coordinates (17.3230° N, 78.5580° E) to clipboard!', 'success');
+            }).catch(() => {
+                this.showToast('Coordinates: 17.3230, 78.5580', 'info');
+            });
+        } else {
+            this.showToast('Coordinates: 17.3230, 78.5580', 'info');
+        }
+    },
+
+    switchCampusMapView(mode) {
+        const btnGmap = document.getElementById('btn-toggle-embed-gmap');
+        const btnSat = document.getElementById('btn-toggle-embed-sat');
+        const btnInteractive = document.getElementById('btn-toggle-embed-interactive');
+        const wrapGmap = document.getElementById('wrapper-gmap-embed');
+        const wrapSat = document.getElementById('wrapper-gmap-satellite');
+        const wrapInteractive = document.getElementById('wrapper-interactive-explorer');
+        const label = document.getElementById('map-active-view-label');
+
+        [btnGmap, btnSat, btnInteractive].forEach(b => { if (b) b.classList.remove('active'); });
+        [wrapGmap, wrapSat, wrapInteractive].forEach(w => { if (w) w.classList.add('hidden'); });
+
+        if (mode === 'gmap') {
+            if (btnGmap) btnGmap.classList.add('active');
+            if (wrapGmap) wrapGmap.classList.remove('hidden');
+            if (label) label.textContent = 'Official Google Maps Roadmap View';
+            this.showToast('Switched to Official Google Maps Roadmap', 'info');
+        } else if (mode === 'satellite') {
+            if (btnSat) btnSat.classList.add('active');
+            if (wrapSat) wrapSat.classList.remove('hidden');
+            if (label) label.textContent = 'Google Maps Hybrid Satellite View';
+            this.showToast('Switched to Google Maps Satellite View', 'info');
+        } else if (mode === 'interactive') {
+            if (btnInteractive) btnInteractive.classList.add('active');
+            if (wrapInteractive) wrapInteractive.classList.remove('hidden');
+            if (label) label.textContent = 'Interactive Campus Explorer with Items & Pins';
+            this.initVisitLeafletMap();
+            this.showToast('Switched to Interactive Campus Explorer', 'info');
+        }
+    },
+
+    visitLeafletMap: null,
+    initVisitLeafletMap() {
+        if (typeof L === 'undefined') return;
+        const container = document.getElementById('visit-leaflet-map');
+        if (!container) return;
+
+        if (!this.visitLeafletMap) {
+            try {
+                this.visitLeafletMap = L.map('visit-leaflet-map', {
+                    center: [17.3230, 78.5580],
+                    zoom: 17,
+                    minZoom: 15,
+                    maxZoom: 19
+                });
+
+                L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                    attribution: '&copy; Google Maps',
+                    subdomains: ['0', '1', '2', '3'],
+                    maxZoom: 20
+                }).addTo(this.visitLeafletMap);
+
+                const blocks = CampusStore.campusBlocks || [];
+                blocks.forEach(b => {
+                    const icon = L.divIcon({
+                        className: 'custom-leaflet-marker',
+                        html: `<div class="building-map-chip" onclick="App.selectCampusBlock('${b.id}')">${b.icon} ${b.shortName}</div>`,
+                        iconSize: [120, 24],
+                        iconAnchor: [60, 12]
+                    });
+                    L.marker([b.lat, b.lng], { icon }).addTo(this.visitLeafletMap).bindPopup(`
+                        <div style="font-family: inherit; font-size: 0.8rem; padding: 4px;">
+                            <strong>${b.icon} ${b.name}</strong><br>
+                            <span style="font-size: 0.7rem; color: #38bdf8;">${b.category}</span><br>
+                            <span style="font-size: 0.72rem; color: #cbd5e1;">${b.locationDetail}</span>
+                        </div>
+                    `);
+                });
+            } catch (e) {
+                console.error('Error initializing visit leaflet map:', e);
+            }
+        }
+
+        setTimeout(() => {
+            if (this.visitLeafletMap) {
+                this.visitLeafletMap.invalidateSize();
+            }
+        }, 150);
+    },
+
+    centerTKRCETOnVisitMap() {
+        const iframe = document.getElementById('iframe-google-map');
+        if (iframe) {
+            iframe.src = 'https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed';
+        }
+        if (this.visitLeafletMap) {
+            this.visitLeafletMap.setView([17.3230, 78.5580], 17, { animate: true });
+        }
+        this.showToast('🎯 Centered on TKR College of Engineering & Technology', 'info');
+    },
+
+    scrollToVisitSection(event) {
+        if (event) event.preventDefault();
+        if (this.currentView !== 'landing') {
+            this.switchView('landing');
+            setTimeout(() => {
+                const el = document.getElementById('section-campus-visit');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 250);
+        } else {
+            const el = document.getElementById('section-campus-visit');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    },
+
+    /* =========================================================
+       TKRCET SINGLE SIGN-ON (SSO) AUTHENTICATION CONTROLLER
+       ========================================================= */
+
+    ssoCurrentTab: 'student',
+
+    switchSSOTab(role) {
+        this.ssoCurrentTab = role;
+        const btnStudent = document.getElementById('tab-sso-student');
+        const btnAdmin = document.getElementById('tab-sso-admin');
+        const paneStudent = document.getElementById('pane-sso-student');
+        const paneAdmin = document.getElementById('pane-sso-admin');
+
+        if (role === 'student') {
+            if (btnStudent) btnStudent.classList.add('active');
+            if (btnAdmin) btnAdmin.classList.remove('active');
+            if (paneStudent) paneStudent.classList.remove('hidden');
+            if (paneAdmin) paneAdmin.classList.add('hidden');
+        } else {
+            if (btnAdmin) btnAdmin.classList.add('active');
+            if (btnStudent) btnStudent.classList.remove('active');
+            if (paneAdmin) paneAdmin.classList.remove('hidden');
+            if (paneStudent) paneStudent.classList.add('hidden');
+        }
+    },
+
+    validateSSORoll(roll) {
+        const badge = document.getElementById('sso-roll-badge');
+        if (!badge) return;
+
+        const val = roll.trim().toUpperCase();
+        const student = CampusStore.getStudentByRoll(val);
+
+        if (student) {
+            badge.className = 'roll-validation-badge roll-valid';
+            badge.innerHTML = `✅ Verified TKRCET Student: ${student.name} (${student.branch})`;
+            const emailInput = document.getElementById('sso-student-email');
+            if (emailInput && student.college_email) {
+                emailInput.value = student.college_email;
+            }
+        } else if (/^[0-9]{2}[A-Z0-9]{3}[A-Z0-9]{5}$/i.test(val)) {
+            badge.className = 'roll-validation-badge roll-valid';
+            badge.innerHTML = `✅ Valid JNTUH/TKRCET Roll Format: ${val}`;
+        } else if (val.length >= 4) {
+            badge.className = 'roll-validation-badge roll-invalid';
+            badge.innerHTML = `⚠️ Standard TKRCET format: 10 chars (e.g. 22K91A0542)`;
+        } else {
+            badge.className = 'roll-validation-badge roll-invalid';
+            badge.innerHTML = `⚠️ Enter authentic 10-digit TKRCET Roll Number`;
+        }
+    },
+
+    handleStudentLogin(event) {
+        if (event) event.preventDefault();
+        const rollInput = document.getElementById('sso-student-roll');
+        const emailInput = document.getElementById('sso-student-email');
+        const rollVal = (rollInput ? rollInput.value : '').trim().toUpperCase();
+        const emailVal = (emailInput ? emailInput.value : '').trim();
+
+        const student = CampusStore.getStudentByRoll(rollVal);
+        let personaKey = 'shiva';
+
+        if (rollVal === '22K91A0542') personaKey = 'shiva';
+        else if (rollVal === '23K91A0415') personaKey = 'priya';
+        else if (rollVal === '22K91A6620') personaKey = 'rahul';
+        else if (student) {
+            CampusStore.currentUser = {
+                user_id: 99,
+                roll_no: student.roll_no,
+                name: student.name,
+                college_email: student.college_email || emailVal,
+                role: 'student',
+                student_id: student.roll_no,
+                department: student.branch,
+                phone: student.phone || '+91 98765 00000',
+                avatar: student.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&auto=format&fit=crop&q=80'
+            };
+            this.renderAll();
+            this.showToast(`🎓 Welcome, ${student.name}! Student SSO session established.`, 'success');
+            this.switchView('dashboard');
+            return;
+        }
+
+        CampusStore.setPersona(personaKey);
+        this.renderAll();
+        this.showToast(`🎓 Welcome, ${CampusStore.currentUser.name}! Student SSO authenticated.`, 'success');
+        this.switchView('dashboard');
+    },
+
+    handleAdminLogin(event) {
+        if (event) event.preventDefault();
+        const staffIdInput = document.getElementById('sso-admin-id');
+        const staffId = (staffIdInput ? staffIdInput.value : '').trim().toUpperCase();
+
+        let personaKey = 'admin';
+        if (staffId.includes('SEC') || staffId.includes('09')) {
+            personaKey = 'security';
+        }
+
+        CampusStore.setPersona(personaKey);
+        this.renderAll();
+        this.showToast(`🛡️ Proctor SSO Authenticated: Welcome, ${CampusStore.currentUser.name}!`, 'success');
+        this.switchView('admin');
+    },
+
+    quickLoginSSO(personaKey) {
+        CampusStore.setPersona(personaKey);
+        this.renderAll();
+        const user = CampusStore.currentUser;
+        if (user.role === 'admin') {
+            this.showToast(`🛡️ Authenticated as ${user.name} (${user.department})`, 'success');
+            this.switchView('admin');
+        } else {
+            this.showToast(`🎓 Authenticated as ${user.name} (${user.roll_no})`, 'success');
+            this.switchView('dashboard');
+        }
+    },
+
+    loginWithGoogleWorkspace(personaKey = 'shiva') {
+        this.showToast('Connecting to TKRCET Google Workspace SSO (@tkrcet.ac.in)...', 'info');
+        setTimeout(() => {
+            CampusStore.setPersona(personaKey);
+            this.renderAll();
+            this.showToast(`✅ Signed in via TKRCET Google Workspace as ${CampusStore.currentUser.name} (${CampusStore.currentUser.college_email})`, 'success');
+            this.switchView('dashboard');
+        }, 600);
+    },
+
+    logoutUser() {
+        const currentName = CampusStore.currentUser.name;
+        CampusStore.setPersona('shiva');
+        this.renderAll();
+        this.showToast(`Signed out from session (${currentName}). Redirected to login portal.`, 'info');
+        this.switchView('login');
+    },
+
+    renderSSOPortal() {
+        const user = CampusStore.currentUser;
+        const rollInput = document.getElementById('sso-student-roll');
+        const emailInput = document.getElementById('sso-student-email');
+        if (user.role === 'student') {
+            if (rollInput) rollInput.value = user.roll_no;
+            if (emailInput) emailInput.value = user.college_email;
+            this.validateSSORoll(user.roll_no);
+            this.switchSSOTab('student');
+        } else {
+            this.switchSSOTab('admin');
+        }
     }
 };
 

@@ -43,6 +43,17 @@ window.CampusStore = {
             phone: '+91 98765 87654',
             avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80'
         },
+        rahul: {
+            user_id: 5,
+            roll_no: '22K91A6620',
+            name: 'Rahul Varma',
+            college_email: 'rahul.22csm@tkrcet.ac.in',
+            role: 'student',
+            student_id: '22K91A6620',
+            department: 'B.Tech AI & ML (3rd Year)',
+            phone: '+91 98765 11223',
+            avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=120&auto=format&fit=crop&q=80'
+        },
         admin: {
             user_id: 3,
             roll_no: 'EMP-TKR-01',
@@ -402,16 +413,166 @@ window.CampusStore = {
     },
 
     collegeInfo: {
-        name: 'Teegala Krishna Reddy Engineering College (TKREC / TKRCET)',
-        address: 'Survey No -8/A Medbowli, Meerpet, Telangana 500097',
+        name: 'TKR College of Engineering & Technology (TKREC / TKRCET)',
+        fullName: 'TKR College of Engineering & Technology',
+        address: 'Medbowli, Meerpet, Saroornagar, Hyderabad – 500097, Telangana, India',
+        surveyAddress: 'Survey No -8/A Medbowli, Meerpet, Telangana 500097',
         pincode: '500097',
         mandal: 'Balapur / Saroornagar',
         district: 'Ranga Reddy',
         state: 'Telangana',
+        country: 'India',
+        phone: '040-2409 2555',
+        securityPhone: '+91 91000 24001',
+        email: 'info@tkrcet.ac.in',
+        proctorEmail: 'proctor@tkrcet.ac.in',
+        website: 'https://tkrcet.ac.in',
+        workingHours: 'Mon – Sat: 8:30 AM – 5:30 PM (Security 24x7)',
         lat: 17.3230,
         lng: 78.5580,
-        googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097'
+        googleMapsSearchUrl: 'https://www.google.com/maps/search/?api=1&query=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad',
+        googleMapsDirectionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=TKR+College+of+Engineering+%26+Technology%2C+Meerpet%2C+Hyderabad',
+        googleMapsEmbedUrl: 'https://maps.google.com/maps?q=TKR+College+of+Engineering+%26+Technology,+Medbowli,+Meerpet,+Saroornagar,+Hyderabad+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed'
     },
+
+    // Comprehensive TKRCET Campus Blocks, Facilities & Landmarks
+    campusBlocks: [
+        {
+            id: 'canteen',
+            key: 'TKR Student Canteen',
+            name: 'TKR Student Canteen & Food Court',
+            shortName: 'TKR Canteen',
+            icon: '☕',
+            category: 'Dining & Refreshments',
+            description: 'Central campus cafeteria serving breakfast, meals, snacks, and fresh juice, with an open-air shaded dining lawn.',
+            locationDetail: 'Central campus pathway opposite Block A',
+            lat: 17.3223,
+            lng: 78.5574,
+            timings: '8:00 AM – 6:30 PM',
+            floorInfo: 'Ground Floor Dining Hall & Lawn',
+            incharge: 'Mr. Ramesh (Canteen Manager)'
+        },
+        {
+            id: 'library',
+            key: 'TKR Central Library',
+            name: 'TKR Central Library & Digital Vault',
+            shortName: 'Central Library',
+            icon: '📚',
+            category: 'Academic & Vault',
+            description: 'Three-story library facility with quiet study carrels, digital research labs, and the official Ground Floor Lost Property Safe Locker.',
+            locationDetail: 'West Campus Avenue adjacent to Admin Block',
+            lat: 17.3232,
+            lng: 78.5575,
+            timings: '8:30 AM – 7:00 PM',
+            floorInfo: 'Ground Fl: Property Vault • 1st & 2nd Fl: Reading Floors',
+            incharge: 'Mr. Sudhakar (Chief Librarian - 040-2409 2556)'
+        },
+        {
+            id: 'cse-block',
+            key: 'CSE & IT Tech Block',
+            name: 'CSE & IT Engineering Block',
+            shortName: 'CSE & IT Block',
+            icon: '💻',
+            category: 'Engineering & Labs',
+            description: 'Houses CSE, AI/ML, and IT departments with Software Labs 1 to 4, Cloud Computing Center, and Departmental Library.',
+            locationDetail: 'North-East Academic Quadrangle',
+            lat: 17.3237,
+            lng: 78.5582,
+            timings: '8:30 AM – 5:30 PM',
+            floorInfo: '4 Floors: Labs 1-4, Server Room, HOD Chambers',
+            incharge: 'Dr. Suresh Kumar (CSE HOD)'
+        },
+        {
+            id: 'block-a',
+            key: 'Academic Block A',
+            name: 'Academic Block A (Core Engineering)',
+            shortName: 'Block A',
+            icon: '🏛️',
+            category: 'Academic & Labs',
+            description: 'Hosts ECE, Mechanical, and Civil Engineering lecture rooms, Physics Lab 204, Mechanics Workshop, and Dean Office.',
+            locationDetail: 'East Wing Academic Complex',
+            lat: 17.3228,
+            lng: 78.5585,
+            timings: '8:30 AM – 5:30 PM',
+            floorInfo: '3 Floors: Lecture Rooms 101-315 & Engineering Labs',
+            incharge: 'Dr. N. Chandrasekhar (Academic Dean)'
+        },
+        {
+            id: 'auditorium',
+            key: 'Main Auditorium',
+            name: 'Main Campus Auditorium & Seminar Complex',
+            shortName: 'Main Auditorium',
+            icon: '🎭',
+            category: 'Events & Conferences',
+            description: '1,200-seat central auditorium for national symposiums, hackathons, guest lectures, cultural fests, and campus placements.',
+            locationDetail: 'Central Academic Quadrangle',
+            lat: 17.3229,
+            lng: 78.5588,
+            timings: 'Open during scheduled events & symposiums',
+            floorInfo: 'Auditorium Main Stage & Seminar Galleries A/B',
+            incharge: 'Prof. K. Ravindra Reddy (Chief Proctor)'
+        },
+        {
+            id: 'sports-ground',
+            key: 'TKR Sports Ground',
+            name: 'TKR Sports Complex & Cricket Ground',
+            shortName: 'Sports Ground',
+            icon: '🏏',
+            category: 'Sports & Athletics',
+            description: 'Full-size cricket oval, football field, basketball court, athletic tracks, indoor badminton arena, and fitness gymnasium.',
+            locationDetail: 'South-West Campus Perimeter',
+            lat: 17.3218,
+            lng: 78.5564,
+            timings: '6:00 AM – 8:00 AM, 4:30 PM – 7:30 PM',
+            floorInfo: 'Outdoor Grounds & Physical Education Pavilion',
+            incharge: 'Mr. Srinivas (Physical Director)'
+        },
+        {
+            id: 'parking',
+            key: 'Campus Parking Bays',
+            name: 'Campus Two-Wheeler & Bus Parking Bays',
+            shortName: 'Parking Bays',
+            icon: '🅿️',
+            category: 'Transit & Parking',
+            description: 'Dedicated covered two-wheeler parking for students and faculty, alongside the 40+ fleet college bus terminus.',
+            locationDetail: 'North Gate Perimeter & Main Entrance Road',
+            lat: 17.3242,
+            lng: 78.5588,
+            timings: '7:30 AM – 6:30 PM (CCTV Monitored)',
+            floorInfo: 'Bays A through E (Two-wheelers & College Buses)',
+            incharge: 'Officer K. Narsimha (Security Gate 1)'
+        },
+        {
+            id: 'security-gate-1',
+            key: 'Security Gate 1 & Vault',
+            name: 'Gate 1 Main Security Office & Property Vault',
+            shortName: 'Gate 1 Security',
+            icon: '🛡️',
+            category: 'Security & Custody',
+            description: '24x7 Campus Security Central Station, CCTV surveillance hub, visitor screening desk, and primary Safe Custody Locker.',
+            locationDetail: 'Main Campus Entrance, Medbowli Road',
+            lat: 17.3242,
+            lng: 78.5578,
+            timings: '24 Hours / 7 Days Active',
+            floorInfo: 'Security Cabin & Safe Custody Vault',
+            incharge: 'Officer K. Narsimha (+91 91000 24001)'
+        },
+        {
+            id: 'health-center',
+            key: 'Health Center',
+            name: 'Campus Health Center & Ambulance Bay',
+            shortName: 'Health Center',
+            icon: '🏥',
+            category: 'Medical & First Aid',
+            description: 'On-campus first-aid dispensary, doctor consultation room, and 24x7 emergency medical triage and ambulance staging bay.',
+            locationDetail: 'Near Sports Pavilion & Hostel Road',
+            lat: 17.3220,
+            lng: 78.5569,
+            timings: '24 Hours Emergency Medical Assistance',
+            floorInfo: 'Ground Floor Medical Unit',
+            incharge: 'Dr. Ramesh (Medical Incharge - +91 91000 24005)'
+        }
+    ],
 
     landmarksGPS: {
         'Central Library': { lat: 17.3232, lng: 78.5575, x: 28, y: 38, name: 'TKR Central Library' },
@@ -431,7 +592,12 @@ window.CampusStore = {
         'Gate 1 Security': { lat: 17.3242, lng: 78.5578, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
         'Security Gate 1 & Vault': { lat: 17.3242, lng: 78.5578, x: 88, y: 52, name: 'Security Gate 1 & Vault' },
         'Auditorium': { lat: 17.3229, lng: 78.5588, x: 60, y: 38, name: 'Main Auditorium' },
-        'Main Auditorium': { lat: 17.3229, lng: 78.5588, x: 60, y: 38, name: 'Main Auditorium' }
+        'Main Auditorium': { lat: 17.3229, lng: 78.5588, x: 60, y: 38, name: 'Main Auditorium' },
+        'Health Center': { lat: 17.3220, lng: 78.5569, x: 22, y: 72, name: 'Campus Health Center' }
+    },
+
+    getDistanceToCollege(userLat, userLng) {
+        return this.calculateDistanceMeters(userLat, userLng, this.collegeInfo.lat, this.collegeInfo.lng);
     },
 
     getLocationCoordinates(locationName) {
