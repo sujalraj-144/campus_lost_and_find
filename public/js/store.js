@@ -401,6 +401,18 @@ window.CampusStore = {
         }
     },
 
+    collegeInfo: {
+        name: 'Teegala Krishna Reddy Engineering College (TKREC / TKRCET)',
+        address: 'Survey No -8/A Medbowli, Meerpet, Telangana 500097',
+        pincode: '500097',
+        mandal: 'Balapur / Saroornagar',
+        district: 'Ranga Reddy',
+        state: 'Telangana',
+        lat: 17.3230,
+        lng: 78.5580,
+        googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097'
+    },
+
     landmarksGPS: {
         'Central Library': { lat: 17.3232, lng: 78.5575, x: 28, y: 38, name: 'TKR Central Library' },
         'TKR Central Library': { lat: 17.3232, lng: 78.5575, x: 28, y: 38, name: 'TKR Central Library' },

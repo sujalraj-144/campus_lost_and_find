@@ -168,10 +168,10 @@
                 <div class="campus-map-card">
                     <div class="campus-map-header">
                         <div class="campus-map-title-box">
-                            <span style="font-size: 28px;">🗺️</span>
+                            <span style="font-size: 28px;">🏛️</span>
                             <div>
-                                <h3>TKRCET Live Campus Map & Geolocation</h3>
-                                <p>Real-time GPS tracking across TKR College of Engineering & Technology (17.3230° N, 78.5580° E • Meerpet, Hyderabad)</p>
+                                <h3>TKREC / TKRCET Live Campus Map & GPS Locator</h3>
+                                <p>📍 <strong>Survey No -8/A Medbowli, Meerpet, Telangana 500097</strong> • GPS: <strong>17.3230° N, 78.5580° E</strong></p>
                             </div>
                         </div>
 
@@ -197,8 +197,27 @@
                             <button class="map-view-toggle-btn" onclick="App.centerTKRCET()" title="Reset map view to TKRCET campus center">
                                 🎯 Center TKRCET
                             </button>
-                            <a href="https://www.google.com/maps/place/TKR+College+of+Engineering+and+Technology/@17.3230588,78.5580211,17z" target="_blank" rel="noopener noreferrer" class="map-view-toggle-btn" style="text-decoration: none; color: #38bdf8; display: inline-flex; align-items: center; gap: 4px;" title="Open TKRCET directly on Google Maps">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="map-view-toggle-btn" style="text-decoration: none; color: #38bdf8; display: inline-flex; align-items: center; gap: 4px;" title="Open Survey No -8/A Medbowli, Meerpet on Google Maps">
                                 ↗️ Open in Google Maps
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Verified College Address & GPS Bar -->
+                    <div style="background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.15rem;">📍</span>
+                            <div style="font-size: 0.82rem; color: #e2e8f0;">
+                                <strong style="color: #fff;">Official College Location:</strong> Survey No -8/A Medbowli, Meerpet, Telangana 500097
+                                <span style="margin-left: 8px; font-family: monospace; font-size: 0.74rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">GPS: 17.3230° N, 78.5580° E</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-primary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="View verified campus location on Google Maps">
+                                🗺️ View on Google Maps
+                            </a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-xs btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Get live Google Maps directions to this address">
+                                🧭 Navigate to Campus
                             </a>
                         </div>
                     </div>
@@ -224,7 +243,7 @@
                         <!-- Official Google Maps Embed Iframe -->
                         <div id="campus-map-google-embed" class="hidden" style="width: 100%; height: 520px; background: #0b1120;">
                             <iframe 
-                                src="https://maps.google.com/maps?q=TKR+College+of+Engineering+and+Technology,+Meerpet,+Hyderabad&t=k&z=17&ie=UTF8&iwloc=&output=embed" 
+                                src="https://maps.google.com/maps?q=Survey+No+-8%2FA+Medbowli,+Meerpet,+Telangana+500097&t=m&z=17&ie=UTF8&iwloc=&output=embed" 
                                 width="100%" 
                                 height="100%" 
                                 style="border:0;" 
@@ -367,6 +386,42 @@
                 </div>
                 <div id="recent-items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 20px;">
                     <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Official College Campus Location & Address Card -->
+            <div class="container" style="margin-bottom: 50px;">
+                <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.8)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 14px; padding: 22px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="font-size: 36px; background: rgba(56, 189, 248, 0.1); width: 62px; height: 62px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(56, 189, 248, 0.3);">
+                                🏛️
+                            </div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin: 0;">Teegala Krishna Reddy Engineering College (TKREC / TKRCET)</h3>
+                                    <span class="badge badge-info" style="font-size: 0.68rem;">Verified Official Location</span>
+                                </div>
+                                <p style="font-size: 0.88rem; color: #cbd5e1; margin-top: 4px; margin-bottom: 4px;">
+                                    📍 <strong>Official Address:</strong> Survey No -8/A Medbowli, Meerpet, Telangana 500097
+                                </p>
+                                <div style="font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <span>🌐 <strong>Exact GPS:</strong> <span style="color: #38bdf8; font-family: monospace;">17.3230° N, 78.5580° E</span></span>
+                                    <span>📮 <strong>PIN:</strong> 500097</span>
+                                    <span>🏛️ <strong>Mandal:</strong> Meerpet, Balapur / Saroornagar, Ranga Reddy District</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.82rem;">
+                                🗺️ Open in Google Maps
+                            </a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=Survey+No+-8%2FA+Medbowli%2C+Meerpet%2C+Telangana+500097" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.82rem;">
+                                🧭 Navigate to College
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

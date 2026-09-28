@@ -1200,7 +1200,7 @@ window.App = {
                 dashArray: '6, 6',
                 fillColor: '#0ea5e9',
                 fillOpacity: 0.05
-            }).addTo(this.leafletMap).bindTooltip('🏫 TKR College of Engineering & Technology (TKRCET Campus)', {
+            }).addTo(this.leafletMap).bindTooltip('🏫 TKREC / TKRCET Campus • Survey No -8/A Medbowli, Meerpet, Telangana 500097', {
                 sticky: true
             });
 
@@ -1234,11 +1234,12 @@ window.App = {
                 const nearestName = nearest ? (nearest.name || nearest.key) : 'TKRCET Campus';
 
                 const popupHtml = `
-                    <div style="min-width: 220px; font-family: inherit; text-align: center; padding: 4px;">
+                    <div style="min-width: 230px; font-family: inherit; text-align: center; padding: 4px;">
                         <div style="font-size: 1.2rem; margin-bottom: 2px;">📍</div>
                         <div style="font-weight: 800; color: #fff; font-size: 0.88rem; margin-bottom: 2px;">Pin Selected Spot</div>
-                        <div style="font-size: 0.74rem; color: #38bdf8; font-weight: 600; margin-bottom: 4px;">Near ${nearestName}</div>
-                        <div style="font-size: 0.68rem; font-family: monospace; color: #94a3b8; margin-bottom: 10px;">${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E</div>
+                        <div style="font-size: 0.74rem; color: #38bdf8; font-weight: 600; margin-bottom: 2px;">Near ${nearestName}</div>
+                        <div style="font-size: 0.65rem; color: #94a3b8; margin-bottom: 4px;">Survey No -8/A Medbowli, Meerpet, 500097</div>
+                        <div style="font-size: 0.68rem; font-family: monospace; color: #cbd5e1; margin-bottom: 10px;">${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E</div>
                         <div style="display: flex; gap: 6px; justify-content: center;">
                             <button class="btn btn-xs btn-danger" style="flex: 1; padding: 6px 8px; font-size: 0.74rem;" onclick="App.reportAtCoordinates('lost', ${lat}, ${lng}, '${nearestName.replace(/'/g, "\\'")}')">🔴 Report Lost</button>
                             <button class="btn btn-xs btn-success" style="flex: 1; padding: 6px 8px; font-size: 0.74rem;" onclick="App.reportAtCoordinates('found', ${lat}, ${lng}, '${nearestName.replace(/'/g, "\\'")}')">🟢 Report Found</button>
@@ -1333,7 +1334,7 @@ window.App = {
     centerTKRCET() {
         if (this.leafletMap) {
             this.leafletMap.setView([17.3230, 78.5580], 17, { animate: true });
-            this.showToast('🎯 Centered on TKRCET Campus (Meerpet, Hyderabad)', 'info');
+            this.showToast('🎯 Centered on TKREC / TKRCET (Survey No -8/A Medbowli, Meerpet, 500097)', 'info');
         }
     },
 
