@@ -206,8 +206,8 @@
                             <button class="map-filter-btn" id="map-btn-found" onclick="App.filterCampusMap('found')">🟢 Found Only</button>
                             <button class="map-filter-btn" id="map-btn-emergency" onclick="App.filterCampusMap('emergency')">🚨 Emergency Matters</button>
                         </div>
-                        <div style="font-size: 0.72rem; color: var(--text-muted);">
-                            <span>📍 8 Landmarks Geotagged • Click any marker to view custody & claim</span>
+                        <div style="font-size: 0.74rem; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+                            <span>💡 <strong>Tip:</strong> Click anywhere on the campus map to instantly pin and report an item at that spot!</span>
                         </div>
                     </div>
 
@@ -566,6 +566,51 @@
                             <input type="text" id="lost-location-detail" class="form-input" placeholder="e.g. 2nd Floor Quiet Study Zone, Desk #14 near East Window">
                         </div>
 
+                        <!-- Real TKRCET GPS Interactive Map Pin Picker -->
+                        <div class="form-group" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 16px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 6px; color: #f87171;">
+                                    <span style="font-size: 1.1rem;">📍</span> <strong>Pin Lost Location on Live TKRCET Campus Map</strong>
+                                </label>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.pinCurrentLiveLocation('lost')" title="Pin where you are standing right now using device GPS">
+                                        📡 Pin My Live Location
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.togglePickerMapLayer('lost')" id="btn-lost-picker-layer" title="Toggle Satellite / Street View">
+                                        🛰️ Satellite View
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px;">
+                                👆 <strong>Click or drag the red pin anywhere on the campus map below</strong> to mark the exact recovery spot for other students & security.
+                            </p>
+
+                            <!-- Quick Campus Building Selectors -->
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center;">
+                                <span style="font-size: 0.72rem; color: var(--text-dim);">Jump to Block:</span>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Central Library')">📚 Library</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'CSE Block')">💻 CSE Block</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Block A')">🏛️ Block A</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Canteen')">☕ Canteen</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Parking')">🅿️ Parking</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Sports Ground')">🏏 Ground</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Auditorium')">🎭 Auditorium</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('lost', 'Gate 1 Security')">🛡️ Gate 1</button>
+                            </div>
+
+                            <!-- Real Leaflet Map Container -->
+                            <div style="position: relative; border-radius: 10px; overflow: hidden; border: 2px solid rgba(239, 68, 68, 0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                                <div id="lost-picker-map" style="width: 100%; height: 260px; z-index: 1;"></div>
+                                <div style="position: absolute; bottom: 8px; left: 8px; right: 8px; background: rgba(13, 21, 39, 0.92); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.74rem; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 1000; flex-wrap: wrap; gap: 6px;">
+                                    <span id="lost-picker-status-text">🔴 <strong>Pinned at:</strong> Central Library</span>
+                                    <span id="lost-picker-coords-badge" class="badge badge-lost" style="font-family: monospace; font-size: 0.72rem;">17.3232° N, 78.5575° E</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="lost-lat" value="17.3232">
+                            <input type="hidden" id="lost-lng" value="78.5575">
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label" for="lost-date">When did you lose it? *</label>
                             <input type="date" id="lost-date" class="form-input" required value="2026-09-24">
@@ -661,6 +706,51 @@
                         <div class="form-group">
                             <label class="form-label" for="found-location-detail">Exact Location Found</label>
                             <input type="text" id="found-location-detail" class="form-input" placeholder="e.g. 2nd Floor Reading Table 14">
+                        </div>
+
+                        <!-- Real TKRCET GPS Interactive Map Pin Picker (Found) -->
+                        <div class="form-group" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin: 16px 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 6px; color: #34d399;">
+                                    <span style="font-size: 1.1rem;">📍</span> <strong>Pin Found Location on Live TKRCET Campus Map</strong>
+                                </label>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.pinCurrentLiveLocation('found')" title="Pin where you found it using device GPS">
+                                        📡 Pin My Live Location
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.togglePickerMapLayer('found')" id="btn-found-picker-layer" title="Toggle Satellite / Street View">
+                                        🛰️ Satellite View
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 10px;">
+                                👆 <strong>Click or drag the green pin anywhere on the campus map below</strong> to mark the exact recovery spot.
+                            </p>
+
+                            <!-- Quick Campus Building Selectors -->
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center;">
+                                <span style="font-size: 0.72rem; color: var(--text-dim);">Jump to Block:</span>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Central Library')">📚 Library</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'CSE Block')">💻 CSE Block</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Block A')">🏛️ Block A</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Canteen')">☕ Canteen</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Parking')">🅿️ Parking</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Sports Ground')">🏏 Ground</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Auditorium')">🎭 Auditorium</button>
+                                <button type="button" class="btn-picker-pill" onclick="App.quickPinBuilding('found', 'Gate 1 Security')">🛡️ Gate 1</button>
+                            </div>
+
+                            <!-- Real Leaflet Map Container -->
+                            <div style="position: relative; border-radius: 10px; overflow: hidden; border: 2px solid rgba(16, 185, 129, 0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                                <div id="found-picker-map" style="width: 100%; height: 260px; z-index: 1;"></div>
+                                <div style="position: absolute; bottom: 8px; left: 8px; right: 8px; background: rgba(13, 21, 39, 0.92); backdrop-filter: blur(8px); padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.74rem; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; z-index: 1000; flex-wrap: wrap; gap: 6px;">
+                                    <span id="found-picker-status-text">🟢 <strong>Pinned at:</strong> Central Library</span>
+                                    <span id="found-picker-coords-badge" class="badge badge-found" style="font-family: monospace; font-size: 0.72rem;">17.3232° N, 78.5575° E</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="found-lat" value="17.3232">
+                            <input type="hidden" id="found-lng" value="78.5575">
                         </div>
 
                         <div class="form-group">

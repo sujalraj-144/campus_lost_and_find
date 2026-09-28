@@ -26,6 +26,7 @@ window.App = {
     simulationInterval: null,
     simulationStep: 0,
     campusMapFilter: 'all',
+    pickerMaps: {},
 
     init() {
         this.setupNavigation();
@@ -126,6 +127,14 @@ window.App = {
                     this.leafletMap.invalidateSize();
                 }, 150);
             }
+        } else if (viewName === 'report-lost') {
+            setTimeout(() => {
+                this.initPickerMap('lost');
+            }, 150);
+        } else if (viewName === 'report-found') {
+            setTimeout(() => {
+                this.initPickerMap('found');
+            }, 150);
         }
     },
 
@@ -574,6 +583,9 @@ window.App = {
                 const secret = document.getElementById('lost-secret').value;
                 const image_url = document.getElementById('lost-image-url').value || 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&auto=format&fit=crop&q=80';
 
+                const lat = parseFloat(document.getElementById('lost-lat')?.value) || 17.3232;
+                const lng = parseFloat(document.getElementById('lost-lng')?.value) || 78.5575;
+
                 const reportData = {
                     type: 'lost',
                     roll_no: roll_no,
@@ -582,6 +594,8 @@ window.App = {
                     category: category,
                     location: location,
                     location_detail: location_detail,
+                    lat: lat,
+                    lng: lng,
                     date_event: date_event,
                     description: description,
                     secret_identifying_details: secret,
@@ -624,6 +638,8 @@ window.App = {
                 const description = document.getElementById('found-desc').value;
                 const secret = document.getElementById('found-secret').value;
                 const image_url = document.getElementById('found-image-url').value || 'https://images.unsplash.com/photo-1572536147248-ac59a8abfa4b?w=600&auto=format&fit=crop&q=80';
+                const lat = parseFloat(document.getElementById('found-lat')?.value) || 17.3232;
+                const lng = parseFloat(document.getElementById('found-lng')?.value) || 78.5575;
 
                 const reportData = {
                     type: 'found',
@@ -633,6 +649,8 @@ window.App = {
                     location: location,
                     location_detail: location_detail,
                     custody_location: custody,
+                    lat: lat,
+                    lng: lng,
                     date_event: date_event,
                     description: description,
                     secret_identifying_details: secret,
@@ -1188,6 +1206,32 @@ window.App = {
                     iconAnchor: [65, 12]
                 });
                 L.marker([lm.lat, lm.lng], { icon, interactive: false }).addTo(this.leafletMap);
+            });
+
+            // Click anywhere on campus map to drop a pin & launch report form
+            this.leafletMap.on('click', (e) => {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                const nearest = CampusStore.getNearestBuilding(lat, lng);
+                const nearestName = nearest ? (nearest.name || nearest.key) : 'TKRCET Campus';
+
+                const popupHtml = `
+                    <div style="min-width: 220px; font-family: inherit; text-align: center; padding: 4px;">
+                        <div style="font-size: 1.2rem; margin-bottom: 2px;">📍</div>
+                        <div style="font-weight: 800; color: #fff; font-size: 0.88rem; margin-bottom: 2px;">Pin Selected Spot</div>
+                        <div style="font-size: 0.74rem; color: #38bdf8; font-weight: 600; margin-bottom: 4px;">Near ${nearestName}</div>
+                        <div style="font-size: 0.68rem; font-family: monospace; color: #94a3b8; margin-bottom: 10px;">${lat.toFixed(5)}° N, ${lng.toFixed(5)}° E</div>
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <button class="btn btn-xs btn-danger" style="flex: 1; padding: 6px 8px; font-size: 0.74rem;" onclick="App.reportAtCoordinates('lost', ${lat}, ${lng}, '${nearestName.replace(/'/g, "\\'")}')">🔴 Report Lost</button>
+                            <button class="btn btn-xs btn-success" style="flex: 1; padding: 6px 8px; font-size: 0.74rem;" onclick="App.reportAtCoordinates('found', ${lat}, ${lng}, '${nearestName.replace(/'/g, "\\'")}')">🟢 Report Found</button>
+                        </div>
+                    </div>
+                `;
+
+                L.popup({ offset: [0, -5] })
+                    .setLatLng(e.latlng)
+                    .setContent(popupHtml)
+                    .openOn(this.leafletMap);
             });
 
             this.renderCampusMap();
@@ -1813,6 +1857,253 @@ window.App = {
             this.renderAdminEmergencies();
             this.showToast(`Emergency alert #${alertId} marked as resolved.`, 'success');
         }
+    },
+
+    /* =========================================================
+       TKRCET Interactive GPS Pin Picker for Lost & Found Reports
+       ========================================================= */
+
+    initPickerMap(type) {
+        if (typeof L === 'undefined') return;
+
+        const mapContainerId = `${type}-picker-map`;
+        const container = document.getElementById(mapContainerId);
+        if (!container) return;
+
+        // If map already instantiated, simply refresh leaflet size calculation
+        if (this.pickerMaps[type] && this.pickerMaps[type].map) {
+            setTimeout(() => {
+                this.pickerMaps[type].map.invalidateSize();
+            }, 100);
+            return;
+        }
+
+        // Get initial coordinates from hidden input or default to Central Library
+        const latInput = document.getElementById(`${type}-lat`);
+        const lngInput = document.getElementById(`${type}-lng`);
+        const initLat = latInput ? parseFloat(latInput.value) || 17.3232 : 17.3232;
+        const initLng = lngInput ? parseFloat(lngInput.value) || 78.5575 : 78.5575;
+
+        try {
+            const map = L.map(mapContainerId, {
+                center: [initLat, initLng],
+                zoom: 17,
+                minZoom: 15,
+                maxZoom: 19,
+                zoomControl: true
+            });
+
+            const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; CARTO &copy; OpenStreetMap contributors',
+                maxZoom: 19
+            });
+
+            const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri, Maxar',
+                maxZoom: 19
+            });
+
+            darkLayer.addTo(map);
+
+            // Campus boundary perimeter
+            const campusPerimeter = [
+                [17.3248, 78.5562],
+                [17.3249, 78.5587],
+                [17.3238, 78.5599],
+                [17.3216, 78.5593],
+                [17.3212, 78.5564]
+            ];
+            L.polygon(campusPerimeter, {
+                color: type === 'lost' ? '#ef4444' : '#10b981',
+                weight: 2,
+                dashArray: '5, 5',
+                fillColor: type === 'lost' ? '#ef4444' : '#10b981',
+                fillOpacity: 0.04
+            }).addTo(map);
+
+            // Campus landmark chips
+            const landmarkLabels = [
+                { name: '📚 Library', key: 'Central Library', lat: 17.3232, lng: 78.5575 },
+                { name: '💻 CSE Block', key: 'CSE Block', lat: 17.3237, lng: 78.5582 },
+                { name: '🏛️ Block A', key: 'Block A', lat: 17.3228, lng: 78.5585 },
+                { name: '☕ Canteen', key: 'Canteen', lat: 17.3223, lng: 78.5574 },
+                { name: '🅿️ Parking', key: 'Parking', lat: 17.3242, lng: 78.5588 },
+                { name: '🏏 Ground', key: 'Sports Ground', lat: 17.3218, lng: 78.5564 },
+                { name: '🛡️ Gate 1', key: 'Gate 1 Security', lat: 17.3242, lng: 78.5578 },
+                { name: '🎭 Auditorium', key: 'Auditorium', lat: 17.3229, lng: 78.5588 }
+            ];
+
+            landmarkLabels.forEach(lm => {
+                const icon = L.divIcon({
+                    className: 'building-chip-picker',
+                    html: lm.name,
+                    iconSize: [85, 20],
+                    iconAnchor: [42, 10]
+                });
+                const lmMarker = L.marker([lm.lat, lm.lng], { icon }).addTo(map);
+                lmMarker.on('click', () => {
+                    this.updatePinnedLocation(type, lm.lat, lm.lng, true);
+                });
+            });
+
+            // Draggable pin marker
+            const pinClass = type === 'lost' ? 'pin-lost' : 'pin-found';
+            const pinEmoji = type === 'lost' ? '🔴' : '🟢';
+            const markerIcon = L.divIcon({
+                className: 'custom-leaflet-marker',
+                html: `
+                    <div class="map-item-pin-leaflet ${pinClass}">
+                        <div class="pin-pulse-wave"></div>
+                        <div class="pin-marker">
+                            <div class="pin-marker-inner">${pinEmoji}</div>
+                        </div>
+                    </div>
+                `,
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+
+            const marker = L.marker([initLat, initLng], {
+                icon: markerIcon,
+                draggable: true
+            }).addTo(map);
+
+            marker.on('dragend', (e) => {
+                const pos = e.target.getLatLng();
+                this.updatePinnedLocation(type, pos.lat, pos.lng, false);
+            });
+
+            map.on('click', (e) => {
+                this.updatePinnedLocation(type, e.latlng.lat, e.latlng.lng, false);
+            });
+
+            this.pickerMaps[type] = {
+                map: map,
+                marker: marker,
+                currentLayer: 'dark',
+                darkLayer: darkLayer,
+                satLayer: satLayer
+            };
+
+            this.updatePinnedLocation(type, initLat, initLng, false);
+
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 200);
+        } catch (e) {
+            console.error(`[CampusFind Picker] Error initializing ${type} map:`, e);
+        }
+    },
+
+    updatePinnedLocation(type, lat, lng, pan = false) {
+        const latEl = document.getElementById(`${type}-lat`);
+        const lngEl = document.getElementById(`${type}-lng`);
+        if (latEl) latEl.value = lat.toFixed(6);
+        if (lngEl) lngEl.value = lng.toFixed(6);
+
+        const picker = this.pickerMaps[type];
+        if (picker && picker.marker) {
+            picker.marker.setLatLng([lat, lng]);
+            if (pan && picker.map) {
+                picker.map.panTo([lat, lng], { animate: true });
+            }
+        }
+
+        const nearest = CampusStore.getNearestBuilding(lat, lng);
+        const buildingName = nearest ? (nearest.name || nearest.key) : 'TKRCET Campus';
+
+        const statusEl = document.getElementById(`${type}-picker-status-text`);
+        const badgeEl = document.getElementById(`${type}-picker-coords-badge`);
+        const prefix = type === 'lost' ? '🔴' : '🟢';
+
+        if (statusEl) {
+            statusEl.innerHTML = `${prefix} <strong>Pinned at:</strong> ${buildingName}`;
+        }
+        if (badgeEl) {
+            badgeEl.textContent = `${lat.toFixed(4)}° N, ${lng.toFixed(4)}° E`;
+        }
+
+        // Auto-select corresponding option in campus location select dropdown
+        const selectEl = document.getElementById(`${type}-location`);
+        if (selectEl && nearest) {
+            for (let opt of selectEl.options) {
+                if (opt.value.toLowerCase().includes(nearest.key.toLowerCase()) || 
+                    nearest.key.toLowerCase().includes(opt.value.toLowerCase()) ||
+                    nearest.name.toLowerCase().includes(opt.value.toLowerCase())) {
+                    selectEl.value = opt.value;
+                    break;
+                }
+            }
+        }
+    },
+
+    pinCurrentLiveLocation(type) {
+        if (!('geolocation' in navigator)) {
+            this.showToast('Geolocation is not supported by your browser', 'warning');
+            return;
+        }
+
+        this.showToast('📡 Acquiring live GPS fix...', 'info');
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                this.initPickerMap(type);
+                this.updatePinnedLocation(type, latitude, longitude, true);
+                this.showToast(`🎯 Pinned live GPS: ${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E`, 'success');
+            },
+            (err) => {
+                console.warn('[CampusFind GPS] Device GPS error:', err);
+                this.showToast('Could not get device GPS. Pinned to TKRCET Central Library.', 'warning');
+                this.quickPinBuilding(type, 'Central Library');
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+        );
+    },
+
+    quickPinBuilding(type, buildingKey) {
+        const b = CampusStore.landmarksGPS[buildingKey] || CampusStore.landmarksGPS['Central Library'];
+        if (b) {
+            this.initPickerMap(type);
+            this.updatePinnedLocation(type, b.lat, b.lng, true);
+            this.showToast(`📍 Pinned to ${b.name || buildingKey}`, 'info');
+        }
+    },
+
+    togglePickerMapLayer(type) {
+        const picker = this.pickerMaps[type];
+        const btn = document.getElementById(`btn-${type}-picker-layer`);
+        if (!picker || !picker.map) return;
+
+        if (picker.currentLayer === 'dark') {
+            picker.map.removeLayer(picker.darkLayer);
+            picker.satLayer.addTo(picker.map);
+            picker.currentLayer = 'sat';
+            if (btn) btn.innerHTML = '🌌 Dark Street View';
+            this.showToast('Switched picker to 🛰️ High-Res Satellite View', 'info');
+        } else {
+            picker.map.removeLayer(picker.satLayer);
+            picker.darkLayer.addTo(picker.map);
+            picker.currentLayer = 'dark';
+            if (btn) btn.innerHTML = '🛰️ Satellite View';
+            this.showToast('Switched picker to 🌌 Cyber Dark View', 'info');
+        }
+    },
+
+    reportAtCoordinates(type, lat, lng, buildingName) {
+        if (this.leafletMap) {
+            this.leafletMap.closePopup();
+        }
+        this.switchView('report-' + type);
+        setTimeout(() => {
+            this.initPickerMap(type);
+            this.updatePinnedLocation(type, lat, lng, true);
+            const locDetail = document.getElementById(`${type}-location-detail`);
+            if (locDetail && (!locDetail.value || locDetail.value.startsWith('Near '))) {
+                locDetail.value = `Near ${buildingName}`;
+            }
+            this.showToast(`📍 Pin placed at ${buildingName}!`, 'info');
+        }, 220);
     }
 };
 

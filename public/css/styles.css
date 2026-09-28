@@ -2292,8 +2292,43 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
     white-space: nowrap;
     text-align: center;
-    pointer-events: none;
     backdrop-filter: blur(4px);
 }
+
+.building-chip-picker {
+    cursor: pointer;
+    pointer-events: auto !important;
+    transition: all 0.2s ease;
+}
+
+.building-chip-picker:hover {
+    background: #0284c7;
+    border-color: #38bdf8;
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+.btn-picker-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-picker-pill:hover {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
 
 
