@@ -792,7 +792,10 @@ window.App = {
                         </div>
                     ` : ''}
 
-                    <div class="modal-actions mt-6 flex items-center justify-end gap-3">
+                    <div class="modal-actions mt-6 flex items-center justify-end gap-3 flex-wrap">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${item.lat || 17.3230},${item.lng || 78.5580}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            🗺️ Google Maps Directions
+                        </a>
                         <button class="btn btn-secondary" onclick="App.closeAllModals()">Close</button>
                         ${isFound && item.status !== 'returned' ? `
                             <button class="btn btn-primary" onclick="App.openClaimModal(${item.item_id})">
@@ -1153,20 +1156,35 @@ window.App = {
                 zoomControl: true
             });
 
-            // Tile Layer 1: Cyber Dark Matter
+            // Tile Layer 1: Official Google Maps Standard Roadmap (Streets, Buildings, Labels)
+            this.tileLayers.google = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                attribution: '&copy; <a href="https://maps.google.com" target="_blank" rel="noopener">Google Maps</a>',
+                subdomains: ['0', '1', '2', '3'],
+                maxZoom: 20
+            });
+
+            // Tile Layer 2: Official Google Maps Hybrid (High-Resolution Satellite with Street & Campus Labels)
+            this.tileLayers['google-sat'] = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                attribution: '&copy; <a href="https://maps.google.com" target="_blank" rel="noopener">Google Maps</a>',
+                subdomains: ['0', '1', '2', '3'],
+                maxZoom: 20
+            });
+
+            // Tile Layer 3: Cyber Dark Matter
             this.tileLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; CARTO &copy; OpenStreetMap contributors',
                 maxZoom: 19
             });
 
-            // Tile Layer 2: High-Resolution Satellite Imagery (Esri)
+            // Tile Layer 4: High-Resolution Satellite Imagery (Esri)
             this.tileLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics',
                 maxZoom: 19
             });
 
-            this.tileLayers.dark.addTo(this.leafletMap);
-            this.currentMapLayer = 'dark';
+            // Default to Official Google Maps
+            this.tileLayers.google.addTo(this.leafletMap);
+            this.currentMapLayer = 'google';
 
             // TKRCET Campus Boundary Perimeter
             const campusPerimeter = [
@@ -1243,28 +1261,49 @@ window.App = {
 
     setMapLayer(mode) {
         this.currentMapLayer = mode;
+        const btnGoogle = document.getElementById('btn-layer-google');
+        const btnGoogleSat = document.getElementById('btn-layer-google-sat');
         const btnDark = document.getElementById('btn-layer-dark');
         const btnSat = document.getElementById('btn-layer-sat');
         const btnBlueprint = document.getElementById('btn-layer-blueprint');
+        const btnEmbed = document.getElementById('btn-layer-embed');
+
         const leafletEl = document.getElementById('leaflet-campus-map');
         const blueprintEl = document.getElementById('campus-map-blueprint');
+        const googleEmbedEl = document.getElementById('campus-map-google-embed');
 
-        [btnDark, btnSat, btnBlueprint].forEach(b => {
+        [btnGoogle, btnGoogleSat, btnDark, btnSat, btnBlueprint, btnEmbed].forEach(b => {
             if (b) b.classList.remove('active');
         });
 
+        // 1. Handle Official Google Maps 3D Embed Iframe
+        if (mode === 'embed') {
+            if (btnEmbed) btnEmbed.classList.add('active');
+            if (leafletEl) leafletEl.classList.add('hidden');
+            if (blueprintEl) blueprintEl.classList.add('hidden');
+            if (googleEmbedEl) googleEmbedEl.classList.remove('hidden');
+            this.showToast('Switched to Official Google Maps Interactive 3D Embed View', 'info');
+            return;
+        }
+
+        // 2. Handle Architectural Blueprint Schematic
         if (mode === 'blueprint') {
             if (btnBlueprint) btnBlueprint.classList.add('active');
             if (leafletEl) leafletEl.classList.add('hidden');
+            if (googleEmbedEl) googleEmbedEl.classList.add('hidden');
             if (blueprintEl) blueprintEl.classList.remove('hidden');
             this.renderBlueprintPins();
             this.showToast('Switched to Architectural Blueprint schematic', 'info');
             return;
         }
 
+        // 3. Leaflet-based layers (Google Maps, Google Satellite, Cyber Dark, Esri)
         if (leafletEl) leafletEl.classList.remove('hidden');
         if (blueprintEl) blueprintEl.classList.add('hidden');
+        if (googleEmbedEl) googleEmbedEl.classList.add('hidden');
 
+        if (mode === 'google' && btnGoogle) btnGoogle.classList.add('active');
+        if (mode === 'google-sat' && btnGoogleSat) btnGoogleSat.classList.add('active');
         if (mode === 'dark' && btnDark) btnDark.classList.add('active');
         if (mode === 'satellite' && btnSat) btnSat.classList.add('active');
 
@@ -1281,7 +1320,14 @@ window.App = {
                 this.leafletMap.invalidateSize();
             }, 100);
         }
-        this.showToast(`Switched map layer to ${mode === 'dark' ? '🌌 Cyber Dark' : '🛰️ High-Res Satellite'}`, 'info');
+
+        const labels = {
+            'google': '🗺️ Google Maps (Official Road & Campus Buildings)',
+            'google-sat': '🌍 Google Maps Hybrid Satellite (Satellite + Labels)',
+            'dark': '🌌 Cyber Dark Matter',
+            'satellite': '🛰️ Esri High-Resolution Satellite'
+        };
+        this.showToast(`Switched map layer to ${labels[mode] || mode}`, 'info');
     },
 
     centerTKRCET() {
@@ -1889,21 +1935,32 @@ window.App = {
                 center: [initLat, initLng],
                 zoom: 17,
                 minZoom: 15,
-                maxZoom: 19,
+                maxZoom: 20,
                 zoomControl: true
             });
 
+            // Google Maps Standard Layer (Roadmap & College Buildings)
+            const googleLayer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google Maps',
+                subdomains: ['0', '1', '2', '3'],
+                maxZoom: 20
+            });
+
+            // Google Maps Hybrid Layer (High-Resolution Satellite + Roads + Building Names)
+            const googleSatLayer = L.tileLayer('https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                attribution: '&copy; Google Maps',
+                subdomains: ['0', '1', '2', '3'],
+                maxZoom: 20
+            });
+
+            // Cyber Dark Layer
             const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; CARTO &copy; OpenStreetMap contributors',
                 maxZoom: 19
             });
 
-            const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: 'Tiles &copy; Esri, Maxar',
-                maxZoom: 19
-            });
-
-            darkLayer.addTo(map);
+            // Default to Google Maps
+            googleLayer.addTo(map);
 
             // Campus boundary perimeter
             const campusPerimeter = [
@@ -1980,9 +2037,10 @@ window.App = {
             this.pickerMaps[type] = {
                 map: map,
                 marker: marker,
-                currentLayer: 'dark',
-                darkLayer: darkLayer,
-                satLayer: satLayer
+                currentLayer: 'google',
+                googleLayer: googleLayer,
+                googleSatLayer: googleSatLayer,
+                darkLayer: darkLayer
             };
 
             this.updatePinnedLocation(type, initLat, initLng, false);
@@ -2037,6 +2095,56 @@ window.App = {
         }
     },
 
+    setPickerLayer(type, mode) {
+        this.initPickerMap(type);
+        const picker = this.pickerMaps[type];
+        if (!picker || !picker.map) return;
+
+        const layers = {
+            'google': picker.googleLayer,
+            'google-sat': picker.googleSatLayer,
+            'dark': picker.darkLayer
+        };
+
+        const target = layers[mode] || picker.googleLayer;
+
+        Object.values(layers).forEach(l => {
+            if (l && picker.map.hasLayer(l)) {
+                picker.map.removeLayer(l);
+            }
+        });
+
+        target.addTo(picker.map);
+        picker.currentLayer = mode;
+
+        ['google', 'google-sat', 'dark'].forEach(m => {
+            const btn = document.getElementById(`btn-${type}-picker-${m}`);
+            if (btn) {
+                if (m === mode) {
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-secondary');
+                } else {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-secondary');
+                }
+            }
+        });
+
+        const titles = {
+            'google': '🗺️ Google Maps (Roads & Buildings)',
+            'google-sat': '🌍 Google Maps Hybrid Satellite',
+            'dark': '🌌 Cyber Dark'
+        };
+        this.showToast(`Picker map set to ${titles[mode] || mode}`, 'info');
+    },
+
+    togglePickerMapLayer(type) {
+        const picker = this.pickerMaps[type];
+        if (!picker) return;
+        const next = picker.currentLayer === 'google' ? 'google-sat' : (picker.currentLayer === 'google-sat' ? 'dark' : 'google');
+        this.setPickerLayer(type, next);
+    },
+
     pinCurrentLiveLocation(type) {
         if (!('geolocation' in navigator)) {
             this.showToast('Geolocation is not supported by your browser', 'warning');
@@ -2067,26 +2175,6 @@ window.App = {
             this.initPickerMap(type);
             this.updatePinnedLocation(type, b.lat, b.lng, true);
             this.showToast(`📍 Pinned to ${b.name || buildingKey}`, 'info');
-        }
-    },
-
-    togglePickerMapLayer(type) {
-        const picker = this.pickerMaps[type];
-        const btn = document.getElementById(`btn-${type}-picker-layer`);
-        if (!picker || !picker.map) return;
-
-        if (picker.currentLayer === 'dark') {
-            picker.map.removeLayer(picker.darkLayer);
-            picker.satLayer.addTo(picker.map);
-            picker.currentLayer = 'sat';
-            if (btn) btn.innerHTML = '🌌 Dark Street View';
-            this.showToast('Switched picker to 🛰️ High-Res Satellite View', 'info');
-        } else {
-            picker.map.removeLayer(picker.satLayer);
-            picker.darkLayer.addTo(picker.map);
-            picker.currentLayer = 'dark';
-            if (btn) btn.innerHTML = '🛰️ Satellite View';
-            this.showToast('Switched picker to 🌌 Cyber Dark View', 'info');
         }
     },
 

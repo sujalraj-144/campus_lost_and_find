@@ -178,10 +178,13 @@
                         <!-- Top Toolbar Controls -->
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                             <!-- Layer Toggles -->
-                            <div style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 6px;">
-                                <button class="map-view-toggle-btn active" id="btn-layer-dark" onclick="App.setMapLayer('dark')" title="Cyber Dark Street Map">🌌 Cyber Dark</button>
-                                <button class="map-view-toggle-btn" id="btn-layer-sat" onclick="App.setMapLayer('satellite')" title="High-Resolution Satellite Imagery">🛰️ Satellite</button>
+                            <div style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 6px; flex-wrap: wrap;">
+                                <button class="map-view-toggle-btn active" id="btn-layer-google" onclick="App.setMapLayer('google')" title="Official Google Maps Street & Buildings View">🗺️ Google Maps</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-google-sat" onclick="App.setMapLayer('google-sat')" title="Google Maps Hybrid Satellite View">🌍 Google Satellite</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-dark" onclick="App.setMapLayer('dark')" title="Cyber Dark Street Map">🌌 Cyber Dark</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-sat" onclick="App.setMapLayer('satellite')" title="Esri Satellite Imagery">🛰️ Esri Satellite</button>
                                 <button class="map-view-toggle-btn" id="btn-layer-blueprint" onclick="App.setMapLayer('blueprint')" title="Architectural Blueprint View">📐 Blueprint</button>
+                                <button class="map-view-toggle-btn" id="btn-layer-embed" onclick="App.setMapLayer('embed')" title="Official Google Maps 3D View with Places">🏛️ Google 3D Embed</button>
                             </div>
 
                             <!-- GPS Action Buttons -->
@@ -194,6 +197,9 @@
                             <button class="map-view-toggle-btn" onclick="App.centerTKRCET()" title="Reset map view to TKRCET campus center">
                                 🎯 Center TKRCET
                             </button>
+                            <a href="https://www.google.com/maps/place/TKR+College+of+Engineering+and+Technology/@17.3230588,78.5580211,17z" target="_blank" rel="noopener noreferrer" class="map-view-toggle-btn" style="text-decoration: none; color: #38bdf8; display: inline-flex; align-items: center; gap: 4px;" title="Open TKRCET directly on Google Maps">
+                                ↗️ Open in Google Maps
+                            </a>
                         </div>
                     </div>
 
@@ -214,6 +220,19 @@
                     <!-- REAL LEAFLET MAP VIEWPORT -->
                     <div id="leaflet-campus-map-wrapper" style="position: relative;">
                         <div id="leaflet-campus-map"></div>
+
+                        <!-- Official Google Maps Embed Iframe -->
+                        <div id="campus-map-google-embed" class="hidden" style="width: 100%; height: 520px; background: #0b1120;">
+                            <iframe 
+                                src="https://maps.google.com/maps?q=TKR+College+of+Engineering+and+Technology,+Meerpet,+Hyderabad&t=k&z=17&ie=UTF8&iwloc=&output=embed" 
+                                width="100%" 
+                                height="100%" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
 
                         <!-- Fallback Architectural Blueprint Layer -->
                         <div id="campus-map-blueprint" class="campus-map-canvas-container hidden">
@@ -572,12 +591,18 @@
                                 <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 6px; color: #f87171;">
                                     <span style="font-size: 1.1rem;">📍</span> <strong>Pin Lost Location on Live TKRCET Campus Map</strong>
                                 </label>
-                                <div style="display: flex; gap: 6px; align-items: center;">
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                     <button type="button" class="btn btn-xs btn-primary" onclick="App.pinCurrentLiveLocation('lost')" title="Pin where you are standing right now using device GPS">
                                         📡 Pin My Live Location
                                     </button>
-                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.togglePickerMapLayer('lost')" id="btn-lost-picker-layer" title="Toggle Satellite / Street View">
-                                        🛰️ Satellite View
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.setPickerLayer('lost', 'google')" id="btn-lost-picker-google" title="Switch to Google Maps Streets">
+                                        🗺️ Google Maps
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.setPickerLayer('lost', 'google-sat')" id="btn-lost-picker-google-sat" title="Switch to Google Maps Satellite">
+                                        🌍 Google Satellite
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.setPickerLayer('lost', 'dark')" id="btn-lost-picker-dark" title="Switch to Cyber Dark">
+                                        🌌 Dark
                                     </button>
                                 </div>
                             </div>
@@ -714,12 +739,18 @@
                                 <label class="form-label" style="margin: 0; display: flex; align-items: center; gap: 6px; color: #34d399;">
                                     <span style="font-size: 1.1rem;">📍</span> <strong>Pin Found Location on Live TKRCET Campus Map</strong>
                                 </label>
-                                <div style="display: flex; gap: 6px; align-items: center;">
+                                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                                     <button type="button" class="btn btn-xs btn-primary" onclick="App.pinCurrentLiveLocation('found')" title="Pin where you found it using device GPS">
                                         📡 Pin My Live Location
                                     </button>
-                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.togglePickerMapLayer('found')" id="btn-found-picker-layer" title="Toggle Satellite / Street View">
-                                        🛰️ Satellite View
+                                    <button type="button" class="btn btn-xs btn-primary" onclick="App.setPickerLayer('found', 'google')" id="btn-found-picker-google" title="Switch to Google Maps Streets">
+                                        🗺️ Google Maps
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.setPickerLayer('found', 'google-sat')" id="btn-found-picker-google-sat" title="Switch to Google Maps Satellite">
+                                        🌍 Google Satellite
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-secondary" onclick="App.setPickerLayer('found', 'dark')" id="btn-found-picker-dark" title="Switch to Cyber Dark">
+                                        🌌 Dark
                                     </button>
                                 </div>
                             </div>
